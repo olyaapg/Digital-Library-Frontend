@@ -1,8 +1,11 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+//import HelloWorld from './components/HelloWorld.vue'
 import Request from './components/Request.vue';
 </script>
 
 <template>
-  <HelloWorld/>
+  <header>
+    <img src="./assets/Digital Library logo.svg">
+  </header>
+  <Request/>
 </template>

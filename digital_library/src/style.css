@@ -1,0 +1,30 @@
+@import url("https://fonts.googleapis.com/css?family=Fira%20Sans+Condensed");
+
+body, html {
+  margin: 0;
+}
+
+header {
+  background-color: #A170EE;
+  color: #010101;
+  padding: 20px;
+}
+
+label {
+  margin-right: 10px;
+}
+
+input {
+  width: 200px;
+}
+
+p {
+  font-size: medium;
+  font-family: 'Fira Sans Condensed', sans-serif;
+}
+
+.searches {
+  color: #A170EE;
+  font-weight: 600;
+  font-style: italic;
+}
