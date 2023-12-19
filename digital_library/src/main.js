@@ -1,125 +1,122 @@
-import { createRouter, createWebHistory } from 'vue-router'
 import { createApp, ref } from 'vue'
 import './style.css'
 import App from './App.vue'
-import Searches from './components/Searches.vue'
-import Books from './components/Books.vue'
-import DetailedInformation from './components/DetailedInformation.vue'
+import router from './router'
 
 
-const router = createRouter({
-    history: createWebHistory(),
-    routes: [{
-        name: 'Searches',
-        path: '/',
-        component: Searches
-    }, {
-        name: 'Books',
-        path: '/books',
-        component: Books
-    }, {
-        name: 'DetailedInformation',
-        path: '/info',
-        component: DetailedInformation
-    }]
-})
 
 // Захардкодила внизу
 
 const dataList = ref([
-    {
-      "id": 1,
-      "title": "Harry Potter and the Half-Blood Prince",
-      "authors": "J.K. Rowling",
-      "coverImageUrl": "https://catherineasquithgallery.com/uploads/posts/2021-02/1613449461_39-p-fon-dlya-prezentatsii-pro-vulkani-47.jpg"
-    },
-    {
-      "id": 2,
-      "title": "elit. Corrupti atque",
-      "authors": "I.I. Ivanov",
-      "coverImageUrl": "https://catherineasquithgallery.com/uploads/posts/2021-02/1613449461_39-p-fon-dlya-prezentatsii-pro-vulkani-47.jpg"
-    },
-    {
-      "id": 3,
-      "title": "How to be a genius",
-      "authors": "Lorem ipsum dolor",
-      "coverImageUrl": "https://avatars.mds.yandex.net/get-vertis-journal/4080458/0_zahod.jpg_1691591973343/orig"
-    },
-    {
-      "id": 4,
-      "title": "Adipisicing",
-      "authors": "sit amet consectetur",
-      "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
-    },
-    {
-      "id": 5,
-      "title": "Good morning",
-      "authors": "earum distinctio nemo",
-      "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
-    },
-    {
-        "id": 1,
-        "title": "Harry Potter and the Half-Blood Prince",
-        "authors": "J.K. Rowling",
-        "coverImageUrl": "https://catherineasquithgallery.com/uploads/posts/2021-02/1613449461_39-p-fon-dlya-prezentatsii-pro-vulkani-47.jpg"
-      },
-      {
-        "id": 2,
-        "title": "elit. Corrupti atque",
-        "authors": "I.I. Ivanov",
-        "coverImageUrl": "https://catherineasquithgallery.com/uploads/posts/2021-02/1613449461_39-p-fon-dlya-prezentatsii-pro-vulkani-47.jpg"
-      },
-      {
-        "id": 3,
-        "title": "How to be a genius",
-        "authors": "Lorem ipsum dolor",
-        "coverImageUrl": "https://avatars.mds.yandex.net/get-vertis-journal/4080458/0_zahod.jpg_1691591973343/orig"
-      },
-      {
-        "id": 4,
-        "title": "Adipisicing",
-        "authors": "sit amet consectetur",
-        "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
-      },
-      {
-        "id": 5,
-        "title": "Good morning",
-        "authors": "earum distinctio nemo",
-        "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
-      },
-      {
-          "id": 1,
-          "title": "Harry Potter and the Half-Blood Prince",
-          "authors": "J.K. Rowling",
-          "coverImageUrl": "https://catherineasquithgallery.com/uploads/posts/2021-02/1613449461_39-p-fon-dlya-prezentatsii-pro-vulkani-47.jpg"
-        },
-        {
-          "id": 2,
-          "title": "elit. Corrupti atque",
-          "authors": "I.I. Ivanov",
-          "coverImageUrl": "https://catherineasquithgallery.com/uploads/posts/2021-02/1613449461_39-p-fon-dlya-prezentatsii-pro-vulkani-47.jpg"
-        },
-        {
-          "id": 3,
-          "title": "How to be a genius",
-          "authors": "Lorem ipsum dolor",
-          "coverImageUrl": "https://avatars.mds.yandex.net/get-vertis-journal/4080458/0_zahod.jpg_1691591973343/orig"
-        },
-        {
-          "id": 4,
-          "title": "Adipisicing",
-          "authors": "sit amet consectetur",
-          "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
-        },
-        {
-          "id": 5,
-          "title": "Good morning",
-          "authors": "earum distinctio nemo",
-          "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
-        }
-  ])
+  {
+    "id": 1,
+    "title": "Harry Potter and the Half-Blood Prince",
+    "authors": "J.K. Rowling",
+    "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
+  },
+  {
+    "id": 2,
+    "title": "elit. Corrupti atque",
+    "authors": "I.I. Ivanov",
+    "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
+  },
+  {
+    "id": 3,
+    "title": "How to be a genius",
+    "authors": "Lorem ipsum dolor",
+    "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
+  },
+  {
+    "id": 4,
+    "title": "Adipisicing",
+    "authors": "sit amet consectetur",
+    "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
+  },
+  {
+    "id": 5,
+    "title": "Good morning",
+    "authors": "earum distinctio nemo",
+    "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
+  },
+  {
+    "id": 1,
+    "title": "Harry Potter and the Half-Blood Prince",
+    "authors": "J.K. Rowling",
+    "coverImageUrl": "https://catherineasquithgallery.com/uploads/posts/2021-02/1613449461_39-p-fon-dlya-prezentatsii-pro-vulkani-47.jpg"
+  },
+  {
+    "id": 2,
+    "title": "elit. Corrupti atque",
+    "authors": "I.I. Ivanov",
+    "coverImageUrl": "https://catherineasquithgallery.com/uploads/posts/2021-02/1613449461_39-p-fon-dlya-prezentatsii-pro-vulkani-47.jpg"
+  },
+  {
+    "id": 3,
+    "title": "How to be a genius",
+    "authors": "Lorem ipsum dolor",
+    "coverImageUrl": "https://avatars.mds.yandex.net/get-vertis-journal/4080458/0_zahod.jpg_1691591973343/orig"
+  },
+  {
+    "id": 4,
+    "title": "Adipisicing",
+    "authors": "sit amet consectetur",
+    "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
+  },
+  {
+    "id": 5,
+    "title": "Good morning",
+    "authors": "earum distinctio nemo",
+    "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
+  },
+  {
+    "id": 1,
+    "title": "Harry Potter and the Half-Blood Prince",
+    "authors": "J.K. Rowling",
+    "coverImageUrl": "https://catherineasquithgallery.com/uploads/posts/2021-02/1613449461_39-p-fon-dlya-prezentatsii-pro-vulkani-47.jpg"
+  },
+  {
+    "id": 2,
+    "title": "elit. Corrupti atque",
+    "authors": "I.I. Ivanov",
+    "coverImageUrl": "https://catherineasquithgallery.com/uploads/posts/2021-02/1613449461_39-p-fon-dlya-prezentatsii-pro-vulkani-47.jpg"
+  },
+  {
+    "id": 3,
+    "title": "How to be a genius",
+    "authors": "Lorem ipsum dolor",
+    "coverImageUrl": "https://avatars.mds.yandex.net/get-vertis-journal/4080458/0_zahod.jpg_1691591973343/orig"
+  },
+  {
+    "id": 4,
+    "title": "Adipisicing",
+    "authors": "sit amet consectetur",
+    "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
+  },
+  {
+    "id": 5,
+    "title": "Good morning",
+    "authors": "earum distinctio nemo",
+    "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
+  }
+])
+
 const serverURL = "https://jsonplaceholder.typicode.com/posts"
+
+const theBook = ref({
+  "title": "Harry Potter and the Chamber of Secrets",
+  "authors": "J.K. Rowling",
+  "language": "en",
+  "genres": "null",
+  "description": "null",
+  "publisher": "Pottermore Publishing",
+  "coverImageUrl": "http://localhost:8080/book/cover/2"
+})
 
 // конец хардкода
 
-createApp(App).provide('dataList', dataList).provide("serverURL", serverURL).use(router).mount('#app')
+createApp(App)
+  .provide('dataList', dataList)
+  .provide("serverURL", serverURL)
+  .provide("theBook", theBook)
+  .use(router)
+  .mount('#app')

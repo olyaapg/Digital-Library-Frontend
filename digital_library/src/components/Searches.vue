@@ -81,7 +81,10 @@ const inputData = reactive({
 function createPost() {
   /*axios
     .post(serverURL + '/book/search/advanced', inputData)
-    .then(response => goToResults(response))*/
+    .then(response => goToResults(response))
+    .catch(error => {
+      console.error('Ошибка запроса:', error);
+    })*/
   axios
     .post(serverURL, inputData)
     .then(response => goToResults(response))

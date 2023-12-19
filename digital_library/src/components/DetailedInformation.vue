@@ -1,11 +1,12 @@
 <template>
-    <h1>hi</h1>
-    <h1>{{ book }}</h1>
+    <div class="mainBody">
+        <h1>hi</h1>
+    </div>
 </template>
 
 <script setup>
 import { inject } from 'vue';
 
+const theBook = inject("theBook")
 
-const book = inject('book')
 </script>
