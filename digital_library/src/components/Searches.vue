@@ -1,7 +1,6 @@
 <template>
   <div class="mainBody">
 
-
     <div class="block">
       <p>On this page you can find the book you need.</p>
       <p>There are two kinds of searches:</p>
@@ -9,7 +8,6 @@
       <p>2. And <span class="searches">semantic book search</span> - for those who have not yet decided.</p>
       <p>Choose the one you like!</p>
     </div>
-
 
     <form @submit.prevent="createPost">
       <div class="block">
@@ -38,7 +36,6 @@
         </div>
       </div>
 
-
       <div class="block">
         <h2>Semantic book search</h2>
 
@@ -50,7 +47,6 @@
           </div>
 
           <button type="submit">FIND</button>
-          <p>odio ea commodi eligendi cumque dolores. Ipsum ipsa fuga impedit delectus, repudiandae natus magnam excepturi beatae blanditiis.</p>
         </div>
       </div>
     </form>
@@ -67,6 +63,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const dataList = inject('dataList')
+const serverURL = inject('serverURL')
 const inputData = reactive({
   must: {
     'chapters.content': {
@@ -81,49 +78,19 @@ const inputData = reactive({
   }
 })
 
-console.log("Started")
 function createPost() {
+  /*axios
+    .post(serverURL + '/book/search/advanced', inputData)
+    .then(response => goToResults(response))*/
   axios
-    .post("https://jsonplaceholder.typicode.com/posts", inputData)
+    .post(serverURL, inputData)
     .then(response => goToResults(response))
 }
 
 function goToResults(response) {
   console.log(response)
-  dataList.value = [
-  {
-    "id": 1,
-    "title": "Harry Potter and the Half-Blood Prince",
-    "authors": "J.K. Rowling",
-    "coverImageUrl": "http://localhost:8080/book/cover/1"
-  },
-  {
-    "id": 2,
-    "title": "elit. Corrupti atque",
-    "authors": "I.I. Ivanov",
-    "coverImageUrl": "https://catherineasquithgallery.com/uploads/posts/2021-02/1613449461_39-p-fon-dlya-prezentatsii-pro-vulkani-47.jpg"
-  },
-  {
-    "id": 3,
-    "title": "How to be a genius",
-    "authors": "Lorem ipsum dolor",
-    "coverImageUrl": "https://avatars.mds.yandex.net/get-vertis-journal/4080458/0_zahod.jpg_1691591973343/orig"
-  },
-  {
-    "id": 4,
-    "title": "Adipisicing",
-    "authors": "sit amet consectetur",
-    "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
-  },
-  {
-    "id": 5,
-    "title": "Good morning",
-    "authors": "earum distinctio nemo",
-    "coverImageUrl": "http://localhost:8080/book/cover/1"
-  }
-]
-  router.push({ name: 'Books' })
   console.log(inputData.must)
+  router.push({ name: 'Books' })
 }
 </script>
 
