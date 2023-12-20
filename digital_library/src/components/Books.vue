@@ -6,7 +6,7 @@
   <div class="listRes">
     <div v-for="(book, index) in dataList" :key="index" class="book">
       <img :src="book.coverImageUrl" alt="Book Cover" class="book-cover" />
-      <span @click="createPost(book.id)">
+      <span @click="getDetails(book.id)">
         <span class="author">{{ book.authors }}</span>
         <span class="title">{{ book.title }}</span>
       </span>
@@ -19,13 +19,14 @@
 <script setup>
 import axios from 'axios'
 import { useRouter } from 'vue-router'
-import { ref, reactive, inject } from 'vue'
+import { inject } from 'vue'
 
 const router = useRouter()
 const dataList = inject('dataList')
 const serverURL = inject('serverURL')
+const theBook = inject("theBook")
 
-function createPost(id) {
+function getDetails(id) {
   console.log(id)
   /*axios
     .get(serverURL + `/book/${id}`)
@@ -43,7 +44,8 @@ function createPost(id) {
 
 function goToResults(response, id) {
   console.log(response)
-  router.push(`/books/${id}`);
+  //theBook.value = response
+  router.push(`/books/${id}`)
 }
 </script>
   

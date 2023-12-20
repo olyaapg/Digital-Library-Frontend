@@ -109,7 +109,7 @@ const theBook = ref({
   "genres": "null",
   "description": "null",
   "publisher": "Pottermore Publishing",
-  "coverImageUrl": "http://localhost:8080/book/cover/2"
+  "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
 })
 
 // конец хардкода
