@@ -1,15 +1,22 @@
 <template>
-  <div class="mainBody">
-    <p>According to your request, there were {{ dataList.length }} books:</p>
-  </div>
+  <div class="innerBody">
+    <div>
+      <p>According to your request, there were {{ dataList.length }} books:</p>
+    </div>
 
-  <div class="listRes">
-    <div v-for="(book, index) in dataList" :key="index" class="book">
-      <img :src="book.coverImageUrl" alt="Book Cover" class="book-cover" />
-      <span @click="getDetails(book.id)">
-        <span class="author">{{ book.authors }}</span>
-        <span class="title">{{ book.title }}</span>
-      </span>
+    <div class="listRes">
+      <table class="bookTable">
+        <tbody>
+          <tr v-for="(book, index) in dataList" :key="index" @click="getDetails(book.id)">
+            <td>{{ index + 1 }}</td>
+            <td><img :src="book.coverImageUrl" alt="Book Cover" class="book-cover" /></td>
+            <td>
+              <h3>{{ book.title }}</h3>
+              <p>{{ book.authors }}</p>
+            </td>
+            </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -52,6 +59,33 @@ function goToResults(response, id) {
 
 
 <style scoped>
+.innerBody {
+  margin-left: 200px;
+  margin-top: 40px;
+}
+
+.bookTable {
+  border-spacing: 10px;
+  /* Установите желаемое расстояние между колонками в пикселях */
+}
+
+.bookTable td,
+.bookTable th {
+  padding: 10px;
+  /* Установите желаемый отступ внутри ячеек */
+}
+
+.bookTable tr {
+  line-height: 1;
+  /* Установите желаемую высоту строки */
+  cursor: pointer;
+}
+
+.authors-list {
+  line-height: 1.5;
+  /* Выберите желаемое расстояние между строками */
+}
+
 .listRes {
   margin-left: 50px;
   margin-right: 50px;
@@ -69,16 +103,4 @@ function goToResults(response, id) {
   max-width: 100%;
   height: auto;
   max-width: 80px;
-}
-
-.author {
-  display: block;
-  margin-top: 5px;
-  font-weight: bold;
-}
-
-.title {
-  display: block;
-  margin-top: 5px;
-}
-</style>
+}</style>
