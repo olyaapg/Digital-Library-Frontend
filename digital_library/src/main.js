@@ -11,7 +11,7 @@ const dataList = ref([
   {
     "id": 1,
     "title": "Harry Potter and the Half-Blood Prince",
-    "authors": "J.K. Rowling, I.I. Ivanov, P.P. Petrov  ",
+    "authors": "J.K. Rowling, I.I. Ivanov, P.P. Petrov",
     "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
   },
   {
@@ -107,7 +107,7 @@ const theBook = ref({
   "authors": "J.K. Rowling",
   "language": "en",
   "genres": "null",
-  "description": "aa",
+  "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos incidunt eos aliquam eius quaerat dicta, quibusdam itaque illum inventore molestiae error non reiciendis laudantium quis officia ex quae eligendi similique?",
   "publisher": "Pottermore Publishing",
   "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
 })

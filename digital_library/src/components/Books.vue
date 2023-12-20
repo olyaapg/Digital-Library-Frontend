@@ -14,7 +14,7 @@
               <h3>{{ book.title }}</h3>
               <p>{{ book.authors }}</p>
             </td>
-            </tr>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -103,4 +103,5 @@ function goToResults(response, id) {
   max-width: 100%;
   height: auto;
   max-width: 80px;
-}</style>
+}
+</style>

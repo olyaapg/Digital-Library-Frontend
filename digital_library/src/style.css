@@ -18,9 +18,9 @@ input {
   width: 200px;
 }
 
-span {
-  text-decoration: underline;
-  cursor: pointer;
+p {
+  font-size: medium;
+  font-family: 'Fira Sans Condensed', sans-serif;
 }
 
 p {
