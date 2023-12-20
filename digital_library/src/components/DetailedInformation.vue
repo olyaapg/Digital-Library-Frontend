@@ -1,42 +1,51 @@
 <template>
-    <div class="mainBody">
-      <img :src="theBook.coverImageUrl" class="book-cover">
-      <div class="details">
-        <h3 v-for="(val, field) in theBook" :key="field">
-          <template v-if="field !== 'coverImageUrl'">
-            {{ field }}: {{ val }}
-          </template>
-        </h3>
-      </div>
+    <div :class="['innerBody', 'mainBody']">
+        <div class="coverDiv">
+            <img :src="theBook.coverImageUrl" class="book-cover">
+        </div>
+        <div class="details">
+            <h2 class="titleBook">{{ theBook.title }}</h2>
+            <div v-for="fieldInfo in listFields" :key="fieldInfo[0]">
+                <h3 v-if="theBook[fieldInfo[0]] !== 'null'" class="field">{{ fieldInfo[1] }}: {{ theBook[fieldInfo[0]] }}</h3>
+            </div>
+        </div>
     </div>
-  </template>
+</template>
 
 <script setup>
-import { inject } from 'vue';
+import { inject, ref } from 'vue';
 
 const theBook = inject("theBook")
+const listFields = ref([
+    ["authors", "Author"],
+    ["language", "Language"],
+    ["genres", "Related Phrases"],
+    ["publisher", "Publisher"],
+    ["description", "About the book"]
+])
 
 </script>
 
 
 <style scoped>
-
 .book-cover {
     max-width: 100%;
     height: auto;
     max-width: 500px;
-    margin-right: 300px;
+    margin-right: 250px;
     margin-left: 50px;
 }
 
-.mainBody {
+.innerBody {
     display: flex;
-    align-items: center;
 }
-
 
 .details {
     display: flex;
     flex-direction: column;
+}
+
+.titleBook {
+    margin-bottom: 50px;
 }
 </style>

@@ -107,7 +107,7 @@ const theBook = ref({
   "authors": "J.K. Rowling",
   "language": "en",
   "genres": "null",
-  "description": "null",
+  "description": "aa",
   "publisher": "Pottermore Publishing",
   "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
 })

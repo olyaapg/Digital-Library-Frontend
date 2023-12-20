@@ -68,7 +68,7 @@ function goToResults(response, id) {
 .book-cover {
   max-width: 100%;
   height: auto;
-  max-width: 200px;
+  max-width: 80px;
 }
 
 .author {
