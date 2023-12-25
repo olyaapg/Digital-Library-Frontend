@@ -10,43 +10,46 @@
     </div>
 
     <form @submit.prevent="createPost">
-      <div class="block">
-        <h2>Advanced book search</h2>
+      <div class="container">
+        <div class="block">
+          <h2>Advanced book search</h2>
 
-        <div class="inputBlock">
-          <label for="title">Title:</label>
-          <input id="title" type="text" v-model="inputData.must.title.query">
-        </div>
+          <div class="inputBlock">
+            <label for="title">Title:</label>
+            <input id="title" type="text" v-model="dataAdvanced.must.title.query" :disabled="typeSearch === 'semantic'">
+          </div>
 
-        <div class="container">
           <div class="inputBlock">
             <label for="author">Author:</label>
-            <input id="author" type="text" v-model="inputData.must.authors.query">
+            <input id="author" type="text" v-model="dataAdvanced.must.authors.query"
+              :disabled="typeSearch === 'semantic'">
           </div>
 
           <div class="inputBlock">
             <label for="quote">Quote:</label>
-            <input id="quote" type="text" v-model="inputData.must['chapters.content'].query" class="longLine">
+            <input id="quote" type="text" v-model="dataAdvanced.must['chapters.content'].query" class="longLine"
+              :disabled="typeSearch === 'semantic'">
+          </div>
+
+          <div class="inputBlock">
+            <label for="publisher">Publisher:</label>
+            <input id="publisher" type="text" v-model="dataAdvanced.must.publisher.query"
+              :disabled="typeSearch === 'semantic'">
           </div>
         </div>
 
-        <div class="inputBlock">
-          <label for="publisher">Publisher:</label>
-          <input id="publisher" type="text">
-        </div>
-      </div>
-
-      <div class="block">
-        <h2>Semantic book search</h2>
-
-        <div :class="['container', 'inputBlock']">
-          <div>
+        <div class="block">
+          <h2>Semantic book search</h2>
+          <div class="inputBlock">
             <label for="chaptersContent" style="display: block; margin-bottom: 15px;">What do you want to read
               about?</label>
-            <input id="chaptersContent" type="text" class="longLine">
+            <input id="chaptersContent" type="text" class="longLine" v-model="dataSemantic.query"
+              :disabled="typeSearch === 'advanced'">
           </div>
-
-          <button type="submit">FIND</button>
+          <div class="buttonContainer">
+            <button id="buttonFind" type="submit" :disabled="typeSearch === 'None'">FIND</button>
+            <p id="labelAboveButton" v-if="typeSearch === 'None'">Fill in at least one field</p>
+          </div>
         </div>
       </div>
     </form>
@@ -58,13 +61,22 @@
 
 <script setup>
 import axios from 'axios'
-import { reactive, inject } from 'vue'
+import { reactive, inject, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const dataList = inject('dataList')
 const serverURL = inject('serverURL')
-const inputData = reactive({
+const typeSearch = computed(() => {
+  if (dataAdvanced.must.title.query || dataAdvanced.must.authors.query || dataAdvanced.must['chapters.content'].query || dataAdvanced.must.publisher.query) {
+    return 'advanced'
+  } else if (dataSemantic.query) {
+    return 'semantic'
+  } else {
+    return 'None'
+  }
+})
+const dataAdvanced = reactive({
   must: {
     'chapters.content': {
       query: ''
@@ -74,25 +86,38 @@ const inputData = reactive({
     },
     authors: {
       query: ''
+    },
+    publisher: {
+      query: ''
     }
   }
 })
+const dataSemantic = reactive({ query: '' })
 
 function createPost() {
-  /*axios
-    .post(serverURL + '/book/search/advanced', inputData)
+  if (typeSearch === 'advanced') {
+    /*axios
+    .post(serverURL + '/book/search/advanced', dataAdvanced)
     .then(response => goToResults(response))
     .catch(error => {
       console.error('Ошибка запроса:', error);
     })*/
+  } else {
+    /*axios
+    .post(serverURL + '/book/search/semantic', dataSemantic)
+    .then(response => goToResults(response))
+    .catch(error => {
+      console.error('Ошибка запроса:', error);
+    })*/
+  }
   axios
-    .post(serverURL, inputData)
+    .post(serverURL, dataAdvanced)
     .then(response => goToResults(response))
 }
 
 function goToResults(response) {
   console.log(response)
-  console.log(inputData.must)
+  console.log(dataAdvanced.must)
   router.push({ name: 'Books' })
 }
 </script>
@@ -102,8 +127,8 @@ function goToResults(response) {
 
 <style scoped>
 .block {
-  margin-bottom: 70px;
   line-height: 0.5;
+  margin-top: 30px;
 }
 
 .inputBlock {
@@ -117,5 +142,17 @@ function goToResults(response) {
 
 .longLine {
   width: 400px;
+}
+
+.buttonContainer {
+  margin-top: 100px;
+}
+
+#labelAboveButton {
+  color: red;
+}
+
+#buttonFind {
+  padding: 10px 20px;
 }
 </style>
