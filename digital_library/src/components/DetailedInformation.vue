@@ -1,12 +1,12 @@
 <template>
     <div :class="['innerBody', 'mainBody']">
         <div>
-            <img :src="theBook.coverImageUrl" class="book-cover">
+            <img :src="`${serverURL}` + '/book/cover/' + `${route.params.number}`" class="book-cover">
         </div>
         <div class="details">
             <h2 class="titleBook">{{ theBook.title }}</h2>
             <div v-for="fieldInfo in listFields" :key="fieldInfo[0]" class="fieldInfo">
-                <h3 v-if="theBook[fieldInfo[0]] !== 'null'">
+                <h3 v-if="theBook[fieldInfo[0]] !== null && theBook[fieldInfo[0]].trim() !== ''">
                     <span>{{ fieldInfo[1] }}:</span>
                     <span class="fieldValue">{{ theBook[fieldInfo[0]] }}</span>
                 </h3>
@@ -37,14 +37,14 @@ const listFields = ref([
 ])
 
 function downloadBook() {
-    /*axios
+    axios
         .get(serverURL + '/book/download/' + route.params.number, {
             responseType: 'blob',
         })
         .then(response => responseProcessing(response))
         .catch(error => {
             console.error('Ошибка запроса:', error);
-        })*/
+        })
 }
 
 function responseProcessing(response) {
@@ -73,7 +73,7 @@ function responseProcessing(response) {
 .book-cover {
     max-width: 100%;
     height: auto;
-    max-width: 500px;
+    max-width: 350px;
     margin-right: 250px;
     margin-left: 50px;
 }
@@ -102,5 +102,6 @@ function responseProcessing(response) {
 
 #buttonDownload {
     padding: 10px 20px;
+    margin-bottom: 40px;
 }
 </style>

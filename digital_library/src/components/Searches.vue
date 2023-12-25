@@ -16,35 +16,45 @@
 
           <div class="inputBlock">
             <label for="title">Title:</label>
-            <input id="title" type="text" v-model="dataAdvanced.must.title.query" :disabled="typeSearch === 'semantic'">
+            <div class="inputContainer">
+              <input id="title" type="text" v-model="dataAdvanced.must.title.query" :disabled="typeSearch === 'semantic'"
+                @input="changeOnAdvanced">
+            </div>
           </div>
 
           <div class="inputBlock">
             <label for="author">Author:</label>
-            <input id="author" type="text" v-model="dataAdvanced.must.authors.query"
-              :disabled="typeSearch === 'semantic'">
-          </div>
-
-          <div class="inputBlock">
-            <label for="quote">Quote:</label>
-            <input id="quote" type="text" v-model="dataAdvanced.must['chapters.content'].query" class="longLine"
-              :disabled="typeSearch === 'semantic'">
+            <div class="inputContainer">
+              <input id="author" type="text" v-model="dataAdvanced.must.authors.query"
+                :disabled="typeSearch === 'semantic'" @input="changeOnAdvanced">
+            </div>
           </div>
 
           <div class="inputBlock">
             <label for="publisher">Publisher:</label>
-            <input id="publisher" type="text" v-model="dataAdvanced.must.publisher.query"
-              :disabled="typeSearch === 'semantic'">
+            <div class="inputContainer">
+              <input id="publisher" type="text" v-model="dataAdvanced.must.publisher.query"
+                :disabled="typeSearch === 'semantic'" @input="changeOnAdvanced">
+            </div>
+          </div>
+          
+          <div class="inputBlock">
+            <label for="quote">Quote:</label>
+            <div class="inputContainer">
+              <input id="quote" type="text" v-model="dataAdvanced.must['chapters.content'].query" class="longLine"
+                :disabled="typeSearch === 'semantic'" @input="changeOnAdvanced">
+            </div>
           </div>
         </div>
 
+
         <div class="block">
           <h2>Semantic book search</h2>
-          <div class="inputBlock">
+          <div class="inputBlockSemantic">
             <label for="chaptersContent" style="display: block; margin-bottom: 15px;">What do you want to read
               about?</label>
             <input id="chaptersContent" type="text" class="longLine" v-model="dataSemantic.query"
-              :disabled="typeSearch === 'advanced'">
+              :disabled="typeSearch === 'advanced'" @input="changeOnSemantic">
           </div>
           <div class="buttonContainer">
             <button id="buttonFind" type="submit" :disabled="typeSearch === 'None'">FIND</button>
@@ -61,21 +71,12 @@
 
 <script setup>
 import axios from 'axios'
-import { reactive, inject, computed } from 'vue'
+import { reactive, inject, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const dataList = inject('dataList')
 const serverURL = inject('serverURL')
-const typeSearch = computed(() => {
-  if (dataAdvanced.must.title.query || dataAdvanced.must.authors.query || dataAdvanced.must['chapters.content'].query || dataAdvanced.must.publisher.query) {
-    return 'advanced'
-  } else if (dataSemantic.query) {
-    return 'semantic'
-  } else {
-    return 'None'
-  }
-})
 const dataAdvanced = reactive({
   must: {
     'chapters.content': {
@@ -93,31 +94,61 @@ const dataAdvanced = reactive({
   }
 })
 const dataSemantic = reactive({ query: '' })
+const typeSearch = ref('None')
+
+function changeOnSemantic(event) {
+  typeSearch.value = event.target.value === '' ? 'None' : 'semantic';
+}
+
+function changeOnAdvanced(event) {
+  typeSearch.value = event.target.value === '' ? 'None' : 'advanced';
+}
 
 function createPost() {
-  if (typeSearch === 'advanced') {
-    /*axios
-    .post(serverURL + '/book/search/advanced', dataAdvanced)
-    .then(response => goToResults(response))
-    .catch(error => {
-      console.error('Ошибка запроса:', error);
-    })*/
+  console.log("createPost")
+  console.log(typeSearch.value)
+  if (typeSearch.value === 'advanced') {
+    console.log("advanced")
+    console.log(dataAdvanced)
+    axios
+      .post(serverURL + '/book/search/advanced', dataAdvanced)
+      .then(response => goToResults(response))
+      .catch(error => {
+        console.error('Ошибка запроса:', error);
+      })
   } else {
-    /*axios
-    .post(serverURL + '/book/search/semantic', dataSemantic)
-    .then(response => goToResults(response))
-    .catch(error => {
-      console.error('Ошибка запроса:', error);
-    })*/
+    console.log("semantic")
+    console.log(dataSemantic)
+    axios
+      .post(serverURL + '/book/search/semantic', dataSemantic)
+      .then(response => goToResults(response))
+      .catch(error => {
+        console.error('Ошибка запроса:', error);
+      })
   }
-  axios
+  /*axios
     .post(serverURL, dataAdvanced)
-    .then(response => goToResults(response))
+    .then(response => goToResults(response))*/
 }
 
 function goToResults(response) {
   console.log(response)
-  console.log(dataAdvanced.must)
+  dataList.value = response.data
+  dataAdvanced.must = {
+    'chapters.content': {
+      query: ''
+    },
+    title: {
+      query: ''
+    },
+    authors: {
+      query: ''
+    },
+    publisher: {
+      query: ''
+    }
+  }
+  dataSemantic.query = ''
   router.push({ name: 'Books' })
 }
 </script>
@@ -133,7 +164,23 @@ function goToResults(response) {
 
 .inputBlock {
   margin-top: 40px;
+  display: flex;
+  align-items: baseline;
+  /* Выравнивание по базовой линии (для вертикального выравнивания) */
 }
+.inputBlockSemantic {
+  margin-top: 40px;
+}
+
+.inputContainer {
+  margin-left: 10px;
+  /* Отступ между label и input (можно настроить по вашему желанию) */
+}
+
+label {
+  min-width: 80px;
+}
+
 
 .container {
   display: flex;
@@ -154,5 +201,4 @@ function goToResults(response) {
 
 #buttonFind {
   padding: 10px 20px;
-}
-</style>
+}</style>

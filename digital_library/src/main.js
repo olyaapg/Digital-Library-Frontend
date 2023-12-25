@@ -6,7 +6,7 @@ import router from './router'
 
 
 // Захардкодила внизу
-
+/*
 const dataList = ref([
   {
     "id": 1,
@@ -98,10 +98,11 @@ const dataList = ref([
     "authors": "earum distinctio nemo",
     "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
   }
-])
+])*/
 
-const serverURL = "https://jsonplaceholder.typicode.com/posts"
-
+//const serverURL = "https://jsonplaceholder.typicode.com/posts"
+const serverURL = "http://192.168.137.1:8080"
+/*
 const theBook = ref({
   "title": "Harry Potter and the Chamber of Secrets",
   "authors": "J.K. Rowling",
@@ -110,9 +111,13 @@ const theBook = ref({
   "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos incidunt eos aliquam eius quaerat dicta, quibusdam itaque illum inventore molestiae error non reiciendis laudantium quis officia ex quae eligendi similique?",
   "publisher": "Pottermore Publishing",
   "coverImageUrl": "https://icdn.lenta.ru/images/2022/09/29/14/20220929143518567/owl_pic_620_cc53e92ef001eb0f929eadf24f37f031.jpg"
-})
+})*/
 
 // конец хардкода
+
+const dataList = ref('')
+const theBook = ref('')
+
 
 createApp(App)
   .provide('dataList', dataList)

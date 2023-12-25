@@ -9,7 +9,7 @@
         <tbody>
           <tr v-for="(book, index) in dataList" :key="index" @click="getDetails(book.id)">
             <td>{{ index + 1 }}</td>
-            <td><img :src="book.coverImageUrl" alt="Book Cover" class="book-cover" /></td>
+            <td><img :src="`${serverURL}` + '/book/cover/' + `${book.id}`" alt="Book Cover" class="book-cover" /></td>
             <td>
               <h3>{{ book.title }}</h3>
               <p>{{ book.authors }}</p>
@@ -35,24 +35,25 @@ const theBook = inject("theBook")
 
 function getDetails(id) {
   console.log(id)
-  /*axios
-    .get(serverURL + `/book/${id}`)
-    .then(response => goToResults(response))
-    .catch(error => {
-      console.error('Ошибка запроса:', error);
-    })*/
   axios
-    .get(serverURL)
+    .get(serverURL + `/book/${id}`)
     .then(response => goToResults(response, id))
     .catch(error => {
       console.error('Ошибка запроса:', error);
     })
+  /*axios
+    .get(serverURL)
+    .then(response => goToResults(response, id))
+    .catch(error => {
+      console.error('Ошибка запроса:', error);
+    })*/
 }
 
 function goToResults(response, id) {
   console.log(response)
-  //theBook.value = response
-  router.push({ name: 'DetailedInformation', params: { number: id } })
+  console.log(id)
+  theBook.value = response.data
+  router.push({ name: 'DetailedInformation', params: { number: `${id}` } })
 }
 </script>
   

@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css?family=Fira%20Sans+Condensed");
 
-body, html {
+body,
+html {
   margin: 0;
 }
 
@@ -11,7 +12,7 @@ header {
 }
 
 label {
-  margin-right: 10px;
+  font-size: large;
 }
 
 input {
