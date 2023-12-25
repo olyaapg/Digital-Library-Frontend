@@ -20,6 +20,7 @@
     </div>
 </template>
 
+
 <script setup>
 import { inject, ref } from 'vue';
 import axios from 'axios';
@@ -44,16 +45,16 @@ function downloadBook() {
         .catch(error => {
             console.error('Ошибка запроса:', error);
         })*/
-    responseProcessing()
 }
 
-function responseProcessing() {
-    const blob = new Blob(['hello', ' ', 'world'], { type: 'application/epub+zip' });
+function responseProcessing(response) {
+    const blob = new Blob([response.data], { type: 'application/epub+zip' });
     const url = window.URL.createObjectURL(blob);
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'book.epub';
+    console.log(theBook.value.title)
+    link.download = `${theBook.value.title}` + '.epub';
 
     document.body.appendChild(link);
     link.click();

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Searches from './components/Searches.vue'
 import Books from './components/Books.vue'
 import DetailedInformation from './components/DetailedInformation.vue'
+import LoadBook from './components/LoadBook.vue'
 
 
 const router = createRouter({
@@ -27,6 +28,10 @@ const router = createRouter({
                 next('/books');
             }
         }
+    }, {
+        name: 'LoadBook',
+        path: '/loadbook',
+        component: LoadBook
     }]
 })
 
