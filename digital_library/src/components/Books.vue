@@ -52,7 +52,7 @@ function getDetails(id) {
 function goToResults(response, id) {
   console.log(response)
   //theBook.value = response
-  router.push(`/books/${id}`)
+  router.push({ name: 'DetailedInformation', params: { number: id } })
 }
 </script>
   

@@ -15,14 +15,19 @@
                 <h3>About the book:</h3>
                 <p>{{ theBook.description }}</p>
             </div>
+            <button id="buttonDownload" @click="downloadBook">Download EPUB</button>
         </div>
     </div>
 </template>
 
 <script setup>
 import { inject, ref } from 'vue';
+import axios from 'axios';
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const theBook = inject("theBook")
+const serverURL = inject("serverURL")
 const listFields = ref([
     ["authors", "Author"],
     ["language", "Language"],
@@ -30,14 +35,40 @@ const listFields = ref([
     ["publisher", "Publisher"]
 ])
 
+function downloadBook() {
+    /*axios
+        .get(serverURL + '/book/download/' + route.params.number, {
+            responseType: 'blob',
+        })
+        .then(response => responseProcessing(response))
+        .catch(error => {
+            console.error('Ошибка запроса:', error);
+        })*/
+    responseProcessing()
+}
+
+function responseProcessing() {
+    const blob = new Blob(['hello', ' ', 'world'], { type: 'application/epub+zip' });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'book.epub';
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+}
 </script>
 
 
 <style scoped>
 .fieldValue {
-  font-weight: normal; 
-  margin-left: 10px;
+    font-weight: normal;
+    margin-left: 10px;
 }
+
 .book-cover {
     max-width: 100%;
     height: auto;
@@ -66,5 +97,9 @@ const listFields = ref([
 
 #descriptionBook {
     margin-top: 20px;
+}
+
+#buttonDownload {
+    padding: 10px 20px;
 }
 </style>
