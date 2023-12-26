@@ -15,7 +15,7 @@
                 <h3>About the book:</h3>
                 <p>{{ theBook.description }}</p>
             </div>
-            <button id="buttonDownload" @click="downloadBook">Download EPUB</button>
+            <button id="buttonDownload" @click="downloadBook" style="align-self: center;">Download EPUB</button>
         </div>
     </div>
 </template>
@@ -65,6 +65,10 @@ function responseProcessing(response) {
 
 
 <style scoped>
+p {
+    line-height: 1.5;
+}
+
 .fieldValue {
     font-weight: normal;
     margin-left: 10px;
@@ -103,5 +107,8 @@ function responseProcessing(response) {
 #buttonDownload {
     padding: 10px 20px;
     margin-bottom: 40px;
+    width: 100px;
+    height: 50px;
+    margin-top: 20px;
 }
 </style>

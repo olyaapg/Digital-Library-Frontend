@@ -9,7 +9,10 @@ header {
   background-color: #A170EE;
   color: #010101;
   padding: 20px;
+  display: flex;
+  align-items: center;
 }
+
 
 label {
   font-size: large;
