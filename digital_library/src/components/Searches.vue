@@ -136,7 +136,8 @@ function goToResults(response) {
   dataList.value = response.data
   dataAdvanced.must = {
     'chapters.content': {
-      query: ''
+      query: '',
+      operator: 'And'
     },
     title: {
       query: ''
@@ -166,7 +167,6 @@ function goToResults(response) {
   margin-top: 40px;
   display: flex;
   align-items: baseline;
-  /* Выравнивание по базовой линии (для вертикального выравнивания) */
 }
 .inputBlockSemantic {
   margin-top: 40px;
@@ -174,7 +174,6 @@ function goToResults(response) {
 
 .inputContainer {
   margin-left: 10px;
-  /* Отступ между label и input (можно настроить по вашему желанию) */
 }
 
 label {
@@ -201,4 +200,5 @@ label {
 
 #buttonFind {
   padding: 10px 20px;
+  cursor: pointer;
 }</style>

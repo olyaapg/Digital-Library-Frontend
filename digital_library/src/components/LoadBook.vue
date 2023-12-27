@@ -23,7 +23,7 @@ const fileInput = ref(null);
 const serverURL = inject("serverURL")
 const fileLabel = ref(null)
 const statuses = ref(["Wait a moment, please...", "Successfully! Thank you ^_^", "Something went wrong :(", null])
-const sendingStatus = ref(statuses[3])
+const sendingStatus = ref(statuses.value[3])
 
 const handleFileChange = (event) => {
   const fileInput = event.target;
@@ -41,14 +41,14 @@ const uploadFile = () => {
     const formData = new FormData();
     formData.append('book', file, file.name);
 
-    sendingStatus.value = statuses[0]
+    sendingStatus.value = statuses.value[0]
 
     axios.post(serverURL + '/book/load', formData)
       .then(_response => {
-        sendingStatus = statuses[1]
+        sendingStatus.value = statuses.value[1]
       })
       .catch(_error => {
-        sendingStatus = statuses[2]
+        sendingStatus.value = statuses.value[2]
       });
   } else {
     console.warn('No file selected');

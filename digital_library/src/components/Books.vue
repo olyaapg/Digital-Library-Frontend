@@ -67,24 +67,20 @@ function goToResults(response, id) {
 
 .bookTable {
   border-spacing: 10px;
-  /* Установите желаемое расстояние между колонками в пикселях */
 }
 
 .bookTable td,
 .bookTable th {
   padding: 10px;
-  /* Установите желаемый отступ внутри ячеек */
 }
 
 .bookTable tr {
   line-height: 1;
-  /* Установите желаемую высоту строки */
   cursor: pointer;
 }
 
 .authors-list {
   line-height: 1.5;
-  /* Выберите желаемое расстояние между строками */
 }
 
 .listRes {
