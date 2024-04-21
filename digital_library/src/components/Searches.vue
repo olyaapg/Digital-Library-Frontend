@@ -17,8 +17,8 @@
           <div class="inputBlock">
             <label for="title">Title:</label>
             <div class="inputContainer">
-              <input id="title" type="text" v-model="dataAdvanced.must.title.query" :disabled="typeSearch === 'semantic'"
-                @input="changeOnAdvanced">
+              <input id="title" type="text" v-model="dataAdvanced.must.title.query"
+                :disabled="typeSearch === 'semantic'" @input="changeOnAdvanced">
             </div>
           </div>
 
@@ -37,7 +37,7 @@
                 :disabled="typeSearch === 'semantic'" @input="changeOnAdvanced">
             </div>
           </div>
-          
+
           <div class="inputBlock">
             <label for="quote">Quote:</label>
             <div class="inputContainer">
@@ -57,8 +57,11 @@
               :disabled="typeSearch === 'advanced'" @input="changeOnSemantic">
           </div>
           <div class="buttonContainer">
-            <button id="buttonFind" type="submit" :disabled="typeSearch === 'None'">FIND</button>
-            <p id="labelAboveButton" v-if="typeSearch === 'None'">Fill in at least one field</p>
+            <button type="submit" :disabled="typeSearch === 'None'" class="btn btn-outline-primary" style="margin-bottom: 20px;">
+              <span v-show="isSubmiting" class="spinner-border spinner-border-sm me-1"></span>
+              FIND
+            </button>
+            <p style="color: gray;" v-show="typeSearch === 'None'">Fill in at least one field</p>
           </div>
         </div>
       </div>
@@ -71,12 +74,13 @@
 
 <script setup>
 import axios from 'axios'
-import { reactive, inject, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useBooksStore } from '../stores/books.store';
 
+const serverURL = `${import.meta.env.VITE_API_URL}`;
+const booksStore = useBooksStore();
 const router = useRouter()
-const dataList = inject('dataList')
-const serverURL = inject('serverURL')
 const dataAdvanced = reactive({
   must: {
     'chapters.content': {
@@ -95,6 +99,7 @@ const dataAdvanced = reactive({
 })
 const dataSemantic = reactive({ query: '' })
 const typeSearch = ref('None')
+const isSubmiting = ref(false)
 
 function changeOnSemantic(event) {
   typeSearch.value = event.target.value === '' ? 'None' : 'semantic';
@@ -105,11 +110,8 @@ function changeOnAdvanced(event) {
 }
 
 function createPost() {
-  console.log("createPost")
-  console.log(typeSearch.value)
+  isSubmiting.value = true;
   if (typeSearch.value === 'advanced') {
-    console.log("advanced")
-    console.log(dataAdvanced)
     axios
       .post(serverURL + '/book/search/advanced', dataAdvanced)
       .then(response => goToResults(response))
@@ -117,8 +119,6 @@ function createPost() {
         console.error('Ошибка запроса:', error);
       })
   } else {
-    console.log("semantic")
-    console.log(dataSemantic)
     axios
       .post(serverURL + '/book/search/semantic', dataSemantic)
       .then(response => goToResults(response))
@@ -126,14 +126,11 @@ function createPost() {
         console.error('Ошибка запроса:', error);
       })
   }
-  /*axios
-    .post(serverURL, dataAdvanced)
-    .then(response => goToResults(response))*/
 }
 
 function goToResults(response) {
-  console.log(response)
-  dataList.value = response.data
+  booksStore.setListFoundBooks(response.data);
+  /*
   dataAdvanced.must = {
     'chapters.content': {
       query: '',
@@ -149,8 +146,8 @@ function goToResults(response) {
       query: ''
     }
   }
-  dataSemantic.query = ''
-  router.push({ name: 'Books' })
+  dataSemantic.query = ''*/
+  router.push({ name: 'FoundBooks' })
 }
 </script>
 
@@ -168,6 +165,7 @@ function goToResults(response) {
   display: flex;
   align-items: baseline;
 }
+
 .inputBlockSemantic {
   margin-top: 40px;
 }
@@ -193,12 +191,4 @@ label {
 .buttonContainer {
   margin-top: 100px;
 }
-
-#labelAboveButton {
-  color: red;
-}
-
-#buttonFind {
-  padding: 10px 20px;
-  cursor: pointer;
-}</style>
+</style>

@@ -1,13 +1,13 @@
 <template>
   <div class="innerBody">
     <div>
-      <p>According to your request, there were {{ dataList.length }} books:</p>
+      <p>According to your request, there were {{ booksStore.listFoundBooks.length }} books:</p>
     </div>
 
     <div class="listRes">
       <table class="bookTable">
         <tbody>
-          <tr v-for="(book, index) in dataList" :key="index" @click="getDetails(book.id)">
+          <tr v-for="(book, index) in booksStore.listFoundBooks" :key="index" @click="getDetails(book.id)">
             <td>{{ index + 1 }}</td>
             <td><img :src="`${serverURL}` + '/book/cover/' + `${book.id}`" alt="Book Cover" class="book-cover" /></td>
             <td>
@@ -24,36 +24,15 @@
 
 
 <script setup>
-import axios from 'axios'
 import { useRouter } from 'vue-router'
-import { inject } from 'vue'
+import { useBooksStore } from '../stores/books.store';
 
+const serverURL = `${import.meta.env.VITE_API_URL}`;
+const booksStore = useBooksStore();
 const router = useRouter()
-const dataList = inject('dataList')
-const serverURL = inject('serverURL')
-const theBook = inject("theBook")
 
 function getDetails(id) {
-  console.log(id)
-  axios
-    .get(serverURL + `/book/${id}`)
-    .then(response => goToResults(response, id))
-    .catch(error => {
-      console.error('Ошибка запроса:', error);
-    })
-  /*axios
-    .get(serverURL)
-    .then(response => goToResults(response, id))
-    .catch(error => {
-      console.error('Ошибка запроса:', error);
-    })*/
-}
-
-function goToResults(response, id) {
-  console.log(response)
-  console.log(id)
-  theBook.value = response.data
-  router.push({ name: 'DetailedInformation', params: { number: `${id}` } })
+  router.push({ name: 'DetailedInformation', params: { number: `${id}` } });
 }
 </script>
   

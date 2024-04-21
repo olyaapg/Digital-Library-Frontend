@@ -1,5 +1,5 @@
 <template>
-    <div :class="['innerBody', 'mainBody']">
+    <div v-if="theBook" :class="['innerBody', 'mainBody']">
         <div>
             <img :src="`${serverURL}` + '/book/cover/' + `${route.params.number}`" class="book-cover">
         </div>
@@ -22,13 +22,15 @@
 
 
 <script setup>
-import { inject, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import axios from 'axios';
 import { useRoute } from 'vue-router';
+import { fetchWrapper } from '../helpers/fetch-wrapper';
 
 const route = useRoute();
-const theBook = inject("theBook")
-const serverURL = inject("serverURL")
+const serverURL = `${import.meta.env.VITE_API_URL}`;
+
+const theBook = ref();
 const listFields = ref([
     ["authors", "Author"],
     ["language", "Language"],
@@ -61,6 +63,16 @@ function responseProcessing(response) {
 
     document.body.removeChild(link);
 }
+
+onMounted(async () => {
+    await fetchWrapper.get(serverURL + `/book/${route.params.number}`)
+        .then(response => {
+            theBook.value = response.data;
+            console.log(theBook.value)
+        }).catch((err) => {
+            console.log(err);
+        });
+});
 </script>
 
 

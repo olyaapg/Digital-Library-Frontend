@@ -1,6 +1,7 @@
 <template>
   <div class="centered-container">
-    <h3>To upload a book in EPUB format to our Digital library:</h3>
+    <h4>To upload a book in EPUB format to our Digital library:</h4>
+    <br>
     <input id="loadButton" type="file" ref="fileInput" @change="handleFileChange" class="custom-file-upload">
     <label for="loadButton">Choose file</label>
     <div v-if="fileLabel" style="display: flex; flex-direction: column; align-items: center;">
@@ -16,11 +17,11 @@
 
 
 <script setup>
-import { inject, ref } from 'vue';
+import { ref } from 'vue';
 import axios from 'axios';
 
+const serverURL = `${import.meta.env.VITE_API_URL}`;
 const fileInput = ref(null);
-const serverURL = inject("serverURL")
 const fileLabel = ref(null)
 const statuses = ref(["Wait a moment, please...", "Successfully! Thank you ^_^", "Something went wrong :(", null])
 const sendingStatus = ref(statuses.value[3])
