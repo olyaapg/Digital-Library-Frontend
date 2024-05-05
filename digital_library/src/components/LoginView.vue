@@ -26,18 +26,13 @@
                 <div class="mb-3">
                     <button class="btn btn-primary" :disabled="isSubmitting">
                         <span v-show="isSubmitting" class="spinner-border spinner-border-sm me-1"></span>
-                        Login
+                        {{ buttonInscription }}
                     </button>
                 </div>
                 <div v-if="errors.apiError" class="alert alert-danger mt-3 mb-0">{{ errors.apiError }}</div>
             </Form>
             <div style="color: blue; cursor: pointer; width: fit-content;" @click="isRegister = !isRegister">
-                <div v-show="!isRegister">
-                    Haven't signed up yet?
-                </div>
-                <div v-show="isRegister">
-                    Already have an account?
-                </div>
+                {{ underButtonInscription }}
             </div>
         </div>
         <div class="image-wrapper">
@@ -47,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Form, Field } from 'vee-validate';
 import * as Yup from 'yup';
 
@@ -58,6 +53,27 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const isRegister = ref(false);
+const heading = computed(() => {
+    if (isRegister.value) {
+        return "Create your account";
+    } else {
+        return "Log In";
+    }
+});
+const buttonInscription = computed(() => {
+    if (isRegister.value) {
+        return "Sign up";
+    } else {
+        return "Log in";
+    }
+});
+const underButtonInscription = computed(() => {
+    if (isRegister.value) {
+        return "Already have an account?";
+    } else {
+        return "Haven't signed up yet?";
+    }
+});
 
 // redirect to home if already logged in
 if (authStore.user) {

@@ -100,13 +100,11 @@ async function downloadBook() {
     };
 }
 
-function responseProcessing(response) {
-    const blob = new Blob([response.data], { type: 'application/epub+zip' });
+function responseProcessing(blob) {
     const url = window.URL.createObjectURL(blob);
 
     const link = document.createElement('a');
     link.href = url;
-    console.log(theBook.value.title)
     link.download = `${theBook.value.title}` + '.epub';
 
     document.body.appendChild(link);
