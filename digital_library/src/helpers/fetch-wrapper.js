@@ -13,13 +13,16 @@ function request(method) {
             method,
             headers: authHeader(url)
         };
-        if (body) {
+        if (body instanceof FormData) {
+            requestOptions.body = body;
+        } else if (body) {
             requestOptions.headers['Content-Type'] = 'application/json';
             requestOptions.body = JSON.stringify(body);
         }
         if (credentials) {
             requestOptions.credentials = credentials;
         }
+        console.log(requestOptions)
         return fetch(url, requestOptions).then(handleResponse);
     }
 }
@@ -29,10 +32,10 @@ function request(method) {
 function authHeader(url) {
     // return auth header with jwt if user is logged in and request is to the api url
     const { user } = useAuthStore();
-    const isLoggedIn = !!user?.jwtToken;
+    const isLoggedIn = !!user?.accessToken;
     const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
     if (isLoggedIn && isApiUrl) {
-        return { Authorization: `Bearer ${user.jwtToken}` };
+        return { Authorization: `Bearer ${user.accessToken}` };
     } else {
         return {};
     }

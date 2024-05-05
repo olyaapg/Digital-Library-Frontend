@@ -14,7 +14,7 @@ export const router = createRouter({
         { name: "Searches", path: '/', component: Searches },
         { name: "LoginView", path: '/login', component: LoginView },
         { name: "FoundBooks", path: '/foundbooks', component: FoundBooks },
-        { name: "LoadBook", path: '/loadbook', component: LoadBook },
+        { name: "LoadBook", path: '/loadbook', component: LoadBook, meta: { requiresAdmin: true } },
         {
             name: "DetailedInformation", path: '/foundbooks/:number', component: DetailedInformation,
             props: true,
@@ -31,9 +31,23 @@ export const router = createRouter({
     ]
 });
 
-/*
-router.beforeEach(async (to) => {
-    // redirect to login page if not logged in and trying to access a restricted page
+
+router.beforeEach((to, from, next) => {
+    const authStore = useAuthStore();
+    if (to.meta.requiresAdmin) {
+        // Проверяем роль пользователя
+        if (authStore.user.role !== 'ADMIN') {
+            // Если у пользователя нет прав администратора, оставляем его на текущей странице
+            next(false);
+        } else {
+            // Если у пользователя есть права администратора, продолжаем нормально
+            next();
+        }
+    } else {
+        // Если маршрут не требует административных прав, продолжаем нормально
+        next();
+    }
+    /* redirect to login page if not logged in and trying to access a restricted page
     const publicPages = ['/login'];
     const authRequired = !publicPages.includes(to.path);
     const authStore = useAuthStore();
@@ -43,5 +57,5 @@ router.beforeEach(async (to) => {
             path: '/login',
             query: { returnUrl: to.href }
         };
-    }
-});*/
+    }*/
+});

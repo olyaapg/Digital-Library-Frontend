@@ -5,7 +5,7 @@
         <img src="./assets/Digital Library logo.svg" class="logo">
       </router-link>
       <div>
-        <router-link to="/loadbook" class="link button">
+        <router-link v-if="isAdmin" to="/loadbook" class="link button">
           <img src="./assets/load icon.svg" class="button">
           load
         </router-link>
@@ -24,9 +24,17 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useAuthStore } from './stores/auth.store';
 
 const authStore = useAuthStore();
+const isAdmin = computed(() => {
+  if (authStore.user && authStore.user.role === 'ADMIN') {
+    return true;
+  } else {
+    return false;
+  }
+});
 </script>
 
 <style scoped>

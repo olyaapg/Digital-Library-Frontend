@@ -79,14 +79,14 @@ async function onSubmit(values, { setErrors }) {
     if (isRegister.value == false) {
         try {
             await authStore.login(login, password);
-            router.push({ name: "Searches" });
+            router.back();
         } catch (error) {
             return setErrors({ apiError: error });
         }
     } else {
         try {
             await authStore.signup(login, username, password);
-            router.push({ name: "Searches" });
+            router.back();
         } catch (error_1) {
             return setErrors({ apiError: error_1 });
         }

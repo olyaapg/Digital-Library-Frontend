@@ -7,6 +7,7 @@
       <p>1. <span class="searches">Advanced book search</span> - for those who know exactly what they want;</p>
       <p>2. And <span class="searches">semantic book search</span> - for those who have not yet decided.</p>
       <p>Choose the one you like!</p>
+      <button type="button" class="btn btn-light" @click="clearForm">Clear</button>
     </div>
 
     <form @submit.prevent="createPost">
@@ -57,7 +58,8 @@
               :disabled="typeSearch === 'advanced'" @input="changeOnSemantic">
           </div>
           <div class="buttonContainer">
-            <button type="submit" :disabled="typeSearch === 'None'" class="btn btn-outline-primary" style="margin-bottom: 20px;">
+            <button type="submit" :disabled="typeSearch === 'None'" class="btn btn-outline-primary"
+              style="margin-bottom: 20px;">
               <span v-show="isSubmiting" class="spinner-border spinner-border-sm me-1"></span>
               FIND
             </button>
@@ -73,33 +75,31 @@
 
 
 <script setup>
-import axios from 'axios'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBooksStore } from '../stores/books.store';
+import { fetchWrapper } from '../helpers/fetch-wrapper';
 
 const serverURL = `${import.meta.env.VITE_API_URL}`;
 const booksStore = useBooksStore();
 const router = useRouter()
-const dataAdvanced = reactive({
-  must: {
-    'chapters.content': {
-      query: ''
-    },
-    title: {
-      query: ''
-    },
-    authors: {
-      query: ''
-    },
-    publisher: {
-      query: ''
-    }
-  }
-})
-const dataSemantic = reactive({ query: '' })
-const typeSearch = ref('None')
+const dataAdvanced = reactive({});
+const dataSemantic = reactive({});
+const typeSearch = ref('')
 const isSubmiting = ref(false)
+
+function clearForm() {
+  dataAdvanced.must = {
+    'chapters.content': { query: '' },
+    title: { query: '' },
+    authors: { query: '' },
+    publisher: { query: '' }
+  };
+  dataSemantic.query = '';
+  typeSearch.value = 'None';
+}
+
+clearForm();
 
 function changeOnSemantic(event) {
   typeSearch.value = event.target.value === '' ? 'None' : 'semantic';
@@ -109,27 +109,25 @@ function changeOnAdvanced(event) {
   typeSearch.value = event.target.value === '' ? 'None' : 'advanced';
 }
 
-function createPost() {
+async function createPost() {
   isSubmiting.value = true;
   if (typeSearch.value === 'advanced') {
-    axios
-      .post(serverURL + '/book/search/advanced', dataAdvanced)
+    await fetchWrapper.post(serverURL + '/book/search/advanced', dataAdvanced)
       .then(response => goToResults(response))
       .catch(error => {
         console.error('Ошибка запроса:', error);
-      })
+      });
   } else {
-    axios
-      .post(serverURL + '/book/search/semantic', dataSemantic)
+    await fetchWrapper.post(serverURL + '/book/search/semantic', dataSemantic)
       .then(response => goToResults(response))
       .catch(error => {
         console.error('Ошибка запроса:', error);
-      })
+      });
   }
 }
 
 function goToResults(response) {
-  booksStore.setListFoundBooks(response.data);
+  booksStore.setListFoundBooks(response);
   /*
   dataAdvanced.must = {
     'chapters.content': {

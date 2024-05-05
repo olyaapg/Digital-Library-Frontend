@@ -1,9 +1,21 @@
 <template>
     <div v-if="theBook" :class="['innerBody', 'mainBody']">
-        <div>
-            <img :src="`${serverURL}` + '/book/cover/' + `${route.params.number}`" class="book-cover">
+        <div class="details flexAndColumn">
+            <img :src="`${serverURL}` + '/book/cover/' + `${number}`" class="book-cover">
+            <h2>Popularity</h2>
+            <div class="fieldInfo">
+                <h3>
+                    <span>Number of reviews:</span>
+                    <span class="fieldValue">{{ theBook.reviews.length }}</span>
+                </h3>
+                <h3>
+                    <span>Average rating:</span>
+                    <span class="fieldValue">{{ theBook.meanGrade }}</span>
+                </h3>
+            </div>
         </div>
-        <div class="details">
+
+        <div class="details flexAndColumn">
             <h2 class="titleBook">{{ theBook.title }}</h2>
             <div v-for="fieldInfo in listFields" :key="fieldInfo[0]" class="fieldInfo">
                 <h3 v-if="theBook[fieldInfo[0]] !== null && theBook[fieldInfo[0]].trim() !== ''">
@@ -11,42 +23,81 @@
                     <span class="fieldValue">{{ theBook[fieldInfo[0]] }}</span>
                 </h3>
             </div>
+            <div v-if="theBook.size" class="fieldInfo">
+                <h3>
+                    <span>Size:</span>
+                    <span class="fieldValue">{{ theBook.size }}</span>
+                </h3>
+            </div>
             <div v-if="theBook.description" id="descriptionBook">
                 <h3>About the book:</h3>
                 <p>{{ theBook.description }}</p>
             </div>
-            <button id="buttonDownload" @click="downloadBook" style="align-self: center;">Download EPUB</button>
+
+            <button @click="downloadBook" class="btn btn-success buttonDownload">Download
+                EPUB</button>
+            <div v-if="haveRole">
+                <h2>Create review</h2>
+                <h3 style="margin: 15px;">Your comment:</h3>
+                <div class="flexAndColumn">
+                    <textarea v-model="comment" rows="4" cols="50" placeholder="Write your comment here" maxlength="300"
+                        style="margin-bottom: 15px;"></textarea>
+                    <div class="gradeAndPublish">
+                        <div>
+                            <p style="margin: 0;">Grade</p>
+                            <StarRating v-model:rating="currentRating" :increment="0.5" :star-size="30" />
+                        </div>
+                        <button type="button" @click="publishComment"
+                            class="btn btn-success buttonPublish">Publish</button>
+                    </div>
+                </div>
+            </div>
         </div>
+
+    </div>
+
+    <div v-else class="spinner-container">
+        <div class="spinner"></div>
     </div>
 </template>
 
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import axios from 'axios';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { fetchWrapper } from '../helpers/fetch-wrapper';
+import StarRating from 'vue-star-rating';
+import { useAuthStore } from '../stores/auth.store';
 
+const authStore = useAuthStore();
 const route = useRoute();
 const serverURL = `${import.meta.env.VITE_API_URL}`;
 
+const currentRating = ref(0);
+const number = route.params.number;
 const theBook = ref();
+const comment = ref();
 const listFields = ref([
-    ["authors", "Author"],
+    ["authors", "Authors"],
     ["language", "Language"],
     ["genres", "Related Phrases"],
-    ["publisher", "Publisher"]
-])
+    ["publisher", "Publisher"]])
+const haveRole = computed(() => {
+    if (authStore.user) {
+        return true;
+    } else {
+        return false;
+    }
+});
 
-function downloadBook() {
-    axios
-        .get(serverURL + '/book/download/' + route.params.number, {
-            responseType: 'blob',
-        })
-        .then(response => responseProcessing(response))
-        .catch(error => {
-            console.error('Ошибка запроса:', error);
-        })
+async function downloadBook() {
+    try {
+        const url = `${serverURL}/book/download/${number}`;
+        const response = await fetchWrapper.get(url, null, { responseType: 'blob' });
+        responseProcessing(response);
+    } catch (error) {
+        console.error('Ошибка запроса:', error);
+    };
 }
 
 function responseProcessing(response) {
@@ -64,11 +115,48 @@ function responseProcessing(response) {
     document.body.removeChild(link);
 }
 
+async function publishComment() {
+    let body = {
+        "grade": currentRating.value,
+        "comment": comment.value
+    }
+    await fetchWrapper.post(serverURL + `/review/create/${number}`, body)
+        .then((response) => {
+            console.log(response);
+        }).catch((err) => {
+            console.log(err);
+        });
+    currentRating.value = 0;
+    comment.value = '';
+}
+
 onMounted(async () => {
-    await fetchWrapper.get(serverURL + `/book/${route.params.number}`)
-        .then(response => {
-            theBook.value = response.data;
+    await fetchWrapper.get(serverURL + `/book/${number}`)
+        .then((response) => {
+            theBook.value = response;
             console.log(theBook.value)
+        }).catch((err) => {
+            console.log(err);
+        });
+    if (theBook.value.size) {
+        let bytes = theBook.value.size;
+        if (bytes < 1024) {
+            theBook.value.size = bytes + " bytes";
+        } else if (bytes < 1048576) {
+            theBook.value.size = (bytes / 1024).toFixed(0) + " KB";
+        } else {
+            theBook.value.size = (bytes / 1048576).toFixed(0) + " MB";
+        }
+    }
+    await fetchWrapper.get(serverURL + `/review/getMeanGrade/${number}`)
+        .then((response) => {
+            theBook.value.meanGrade = response;
+        }).catch((err) => {
+            console.log(err);
+        });
+    await fetchWrapper.get(serverURL + `/review/getBook/${number}`)
+        .then((response) => {
+            theBook.value.reviews = response;
         }).catch((err) => {
             console.log(err);
         });
@@ -77,8 +165,9 @@ onMounted(async () => {
 
 
 <style scoped>
-p {
-    line-height: 1.5;
+.flexAndColumn {
+    display: flex;
+    flex-direction: column;
 }
 
 .fieldValue {
@@ -91,7 +180,7 @@ p {
     height: auto;
     max-width: 350px;
     margin-right: 250px;
-    margin-left: 50px;
+    margin-bottom: 30px;
 }
 
 .fieldInfo h3 {
@@ -104,8 +193,7 @@ p {
 }
 
 .details {
-    display: flex;
-    flex-direction: column;
+    margin-left: 50px;
 }
 
 .titleBook {
@@ -116,12 +204,19 @@ p {
     margin-top: 20px;
 }
 
-#buttonDownload {
-    padding: 10px 20px;
-    margin-bottom: 40px;
-    width: 100px;
-    height: 50px;
-    margin-top: 20px;
-    cursor: pointer;
+.buttonDownload {
+    align-self: center;
+    margin: 30px;
+    margin-bottom: 60px;
+}
+
+.buttonPublish {
+    align-self: center;
+}
+
+.gradeAndPublish {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
 }
 </style>

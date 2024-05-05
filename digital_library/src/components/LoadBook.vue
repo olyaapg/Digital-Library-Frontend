@@ -18,7 +18,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import axios from 'axios';
+import { fetchWrapper } from '../helpers/fetch-wrapper';
 
 const serverURL = `${import.meta.env.VITE_API_URL}`;
 const fileInput = ref(null);
@@ -35,7 +35,7 @@ const handleFileChange = (event) => {
   }
 }
 
-const uploadFile = () => {
+const uploadFile = async () => {
   if (fileInput.value.files.length > 0) {
     const file = fileInput.value.files[0];
 
@@ -44,7 +44,7 @@ const uploadFile = () => {
 
     sendingStatus.value = statuses.value[0]
 
-    axios.post(serverURL + '/book/load', formData)
+    await fetchWrapper.post(serverURL + '/book/load', formData)
       .then(_response => {
         sendingStatus.value = statuses.value[1]
       })
@@ -99,4 +99,4 @@ const uploadFile = () => {
 .custom-file-upload+label {
   cursor: pointer;
 }
-</style>  
+</style>

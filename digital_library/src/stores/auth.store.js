@@ -12,22 +12,25 @@ export const useAuthStore = defineStore('auth', {
         refreshTokenTimeout: null
     }),
     actions: {
+        /*async getRole() {
+            const id = this.user.id;
+            const userInfo = await fetchWrapper.get(`${baseUrl}/user/getUser?userId=${id}`);
+            this.user.role = userInfo.role;
+            console.log(userInfo)
+        },*/
         async login(login, password) {
             this.user = await fetchWrapper.post(`${baseUrl}/api/auth/login`, { login, password }, { credentials: 'include' });
             this.startRefreshTokenTimer();
-            console.log("login")
         },
         async signup(login, name, password) {
-            this.user = await fetchWrapper.post(`${baseUrl}/user/regAdmin`, { login, name, password }, { credentials: 'include' });
+            this.user = await fetchWrapper.post(`${baseUrl}/user/reg`, { login, name, password }, { credentials: 'include' });
             this.startRefreshTokenTimer();
-            console.log("signup")
         },
         logout() {
             //fetchWrapper.post(`${baseUrl}/revoke-token`, {}, { credentials: 'include' });
             this.stopRefreshTokenTimer();
             this.user = null;
             //router.push('/login');
-            console.log("logout")
         },
         async refreshToken() {
             let refreshToken = this.user.refreshToken;
@@ -48,12 +51,9 @@ export const useAuthStore = defineStore('auth', {
                 timeout.value = MAXTIMEOUT;
             }
             this.refreshTokenTimeout = setTimeout(this.refreshToken, timeout.value);
-            console.log(timeout.value)
         },
         stopRefreshTokenTimer() {
             clearTimeout(this.refreshTokenTimeout);
-            console.log(user)
-            console.log(this.refreshTokenTimeout)
         }
     }
 });
