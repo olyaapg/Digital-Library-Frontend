@@ -6,7 +6,7 @@
             <div class="fieldInfo">
                 <h3>
                     <span>Number of reviews:</span>
-                    <span class="fieldValue">{{ theBook.reviews.length }}</span>
+                    <span class="fieldValue" v-if="theBook.reviews">{{ theBook.reviews.length }}</span>
                 </h3>
                 <h3>
                     <span>Average rating:</span>
@@ -40,12 +40,12 @@
                 <h2>Create review</h2>
                 <h3 style="margin: 15px;">Your comment:</h3>
                 <div class="flexAndColumn">
-                    <textarea v-model="comment" rows="4" cols="50" placeholder="Write your comment here" maxlength="300"
+                    <textarea v-model="comment" rows="4" cols="50" placeholder="Write your comment here" maxlength="255"
                         style="margin-bottom: 15px;"></textarea>
                     <div class="gradeAndPublish">
                         <div>
                             <p style="margin: 0;">Grade</p>
-                            <StarRating v-model:rating="currentRating" :increment="0.5" :star-size="30" />
+                            <StarRating v-model:rating="currentRating" :star-size="30" />
                         </div>
                         <button type="button" @click="publishComment"
                             class="btn btn-success buttonPublish">Publish</button>
@@ -148,7 +148,11 @@ onMounted(async () => {
     }
     await fetchWrapper.get(serverURL + `/review/getMeanGrade/${number}`)
         .then((response) => {
-            theBook.value.meanGrade = response;
+            if (response === -1) {
+                theBook.value.meanGrade = "-";
+            } else {
+                theBook.value.meanGrade = response.toFixed(2);
+            }
         }).catch((err) => {
             console.log(err);
         });

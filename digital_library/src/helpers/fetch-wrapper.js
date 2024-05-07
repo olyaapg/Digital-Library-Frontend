@@ -22,7 +22,7 @@ function request(method) {
         if (credentials) {
             requestOptions.credentials = credentials;
         }
-        console.log(requestOptions)
+        //console.log(requestOptions)
         return fetch(url, requestOptions).then(handleResponse);
     }
 }
@@ -43,6 +43,8 @@ function authHeader(url) {
 
 
 async function handleResponse(response) {
+    console.log("response:")
+    console.log(response)
     if (!response.ok) {
         const { user, logout } = useAuthStore();
         if ([401, 403].includes(response.status) && user) {
@@ -51,24 +53,34 @@ async function handleResponse(response) {
         }
 
         let error;
-        if (response.headers.get('content-type') && response.headers.get('content-type').includes('application/json')) {
+        if (response.headers.get('content-type') && response.headers.get('content-type').includes('application/json') && (response.statusText !== '')) {
             // Если ошибка возвращается в формате JSON, парсим ее
             const text = await response.text();
             const data = text && JSON.parse(text);
             error = (data && data.message) || response.statusText;
-        } else {
+        } else if (response.statusText !== '') {
             // Если ошибка не возвращается в формате JSON, используем статус текст
             error = response.statusText;
+        } else {
+            error = getErrorDescription(response.status);
         }
         return Promise.reject(error);
     }
-
     // Если ответ в виде blob, возвращаем его
     if (response.headers.get('content-type') && response.headers.get('content-type').includes('application/epub+zip')) {
         return response.blob();
     }
-
     // Если ответ в виде JSON, парсим его
     const text = await response.text();
     return JSON.parse(text);
+}
+
+function getErrorDescription(status_code) {
+    if (status_code === 404) {
+        return "The account was not found. Please check the correctness of the entered data or register.";
+    } else if (status_code === 403) {
+        return "Incorrect username or password.";
+    } else {
+        return "Sorry, there's been a mistake.";
+    }
 }
