@@ -7,7 +7,7 @@
       <p>1. <span class="searches">Advanced book search</span> - for those who know exactly what they want;</p>
       <p>2. And <span class="searches">semantic book search</span> - for those who have not yet decided.</p>
       <p>Choose the one you like!</p>
-      <button type="button" class="btn btn-light" @click="clearForm">Clear</button>
+      <button type="button" class="btn btn-light" @click="clearForm" :disabled="typeSearch === 'None' | isSubmiting">Clear</button>
     </div>
 
     <form @submit.prevent="createPost">
@@ -85,7 +85,7 @@ const booksStore = useBooksStore();
 const router = useRouter()
 const dataAdvanced = reactive({});
 const dataSemantic = reactive({});
-const typeSearch = ref('')
+const typeSearch = ref('None')
 const isSubmiting = ref(false)
 
 function clearForm() {

@@ -43,8 +43,6 @@ function authHeader(url) {
 
 
 async function handleResponse(response) {
-    console.log("response:")
-    console.log(response)
     if (!response.ok) {
         const { user, logout } = useAuthStore();
         if ([401, 403].includes(response.status) && user) {
