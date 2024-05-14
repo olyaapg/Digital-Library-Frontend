@@ -48,8 +48,9 @@
                                 <p style="margin: 0;">Grade</p>
                                 <StarRating v-model:rating="currentRating" :star-size="30" />
                             </div>
-                            <button type="button" @click="publishComment"
-                                class="btn btn-success buttonPublish">Publish</button>
+                            <button type="button" @click="publishComment" class="btn btn-success buttonPublish">
+                                <span v-show="isSubmiting" class="spinner-border spinner-border-sm me-1"></span>
+                                Publish</button>
                         </div>
                     </div>
                 </div>
@@ -86,6 +87,7 @@ const serverURL = `${import.meta.env.VITE_API_URL}`;
 const currentRating = ref(0);
 const page = ref(0);
 const loading = ref(false);
+const isSubmiting = ref(false);
 const bookNumber = route.params.number;
 const theBook = ref();
 const comment = ref();
@@ -123,6 +125,7 @@ function responseProcessing(blob) {
 }
 
 async function publishComment() {
+    isSubmiting.value = true;
     let body = {
         "grade": currentRating.value,
         "comment": comment.value
@@ -133,6 +136,8 @@ async function publishComment() {
         comment.value = '';
     } catch (error) {
         console.error('Ошибка при публикации комментария:', error);
+    } finally {
+        isSubmiting.value = false;
     }
 }
 
