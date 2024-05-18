@@ -82,7 +82,7 @@ import Review from '../components/Review.vue';
 
 const authStore = useAuthStore();
 const route = useRoute();
-const serverURL = `${import.meta.env.VITE_API_URL}`;
+const serverURL = authStore.baseUrl;
 
 const currentRating = ref(0);
 const page = ref(0);

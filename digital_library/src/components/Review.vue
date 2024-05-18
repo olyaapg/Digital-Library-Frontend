@@ -20,8 +20,10 @@ import Swal from 'sweetalert2';
 import { computed } from 'vue';
 import StarRating from 'vue-star-rating';
 import { useAuthStore } from '../stores/auth.store';
+import { fetchWrapper } from '../helpers/fetch-wrapper';
 
 const authStore = useAuthStore();
+const serverUrl = authStore.baseUrl;
 const isAdmin = computed(() => authStore.user && authStore.user.role === 'ADMIN');
 
 function createSwal(title) {
@@ -34,17 +36,18 @@ function createSwal(title) {
 }
 
 function removeReview() {
-  createSwal("Remove review").then((result) => {
+  createSwal("Remove review").then(async (result) => {
     if (result.isConfirmed) {
-      console.log("remove");
+      console.log("remove")
+      //await fetchWrapper.post(`${serverUrl}/user/ban?userId=${review.user.id}`)
     };
   });
 }
 
 function banUser() {
-  createSwal("Ban user").then((result) => {
+  createSwal("Ban user").then(async (result) => {
     if (result.isConfirmed) {
-      console.log("ban");
+      await fetchWrapper.post(`${serverUrl}/user/ban?userId=${review.user.id}`)
     };
   });
 }

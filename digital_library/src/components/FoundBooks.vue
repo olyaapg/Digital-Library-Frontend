@@ -20,22 +20,23 @@
     </div>
   </div>
 </template>
-  
+
 
 
 <script setup>
 import { useRouter } from 'vue-router'
 import { useBooksStore } from '../stores/books.store';
+import { useAuthStore } from '../stores/auth.store';
 
-const serverURL = `${import.meta.env.VITE_API_URL}`;
 const booksStore = useBooksStore();
 const router = useRouter()
+const serverURL = useAuthStore().baseUrl;
 
 function getDetails(id) {
   router.push({ name: 'DetailedInformation', params: { number: `${id}` } });
 }
 </script>
-  
+
 
 
 <style scoped>

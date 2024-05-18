@@ -3,38 +3,35 @@ import { fetchWrapper } from '../helpers/fetch-wrapper';
 import { router } from '../helpers/router';
 import { ref } from 'vue';
 
-const baseUrl = `${import.meta.env.VITE_API_URL}`;
 const MAXTIMEOUT = 2147483647;
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null,
-        refreshTokenTimeout: null
+        refreshTokenTimeout: null,
+        baseUrl: `${import.meta.env.VITE_API_URL}`
     }),
     actions: {
-        /*async getRole() {
-            const id = this.user.id;
-            const userInfo = await fetchWrapper.get(`${baseUrl}/user/getUser?userId=${id}`);
-            this.user.role = userInfo.role;
-            console.log(userInfo)
-        },*/
         async login(login, password) {
-            this.user = await fetchWrapper.post(`${baseUrl}/api/auth/login`, { login, password }, { credentials: 'include' });
+            this.user = await fetchWrapper.post(`${this.baseUrl}/api/auth/login`, { login, password }, { credentials: 'include' });
             this.startRefreshTokenTimer();
         },
-        async signup(login, name, password) {
-            this.user = await fetchWrapper.post(`${baseUrl}/user/reg`, { login, name, password }, { credentials: 'include' });
+        async signup(login, name, password, isSendNotification) {
+            await fetchWrapper.post(`${this.baseUrl}/user/reg`, { login, name, password, isSendNotification }, { credentials: 'include' });
+        },
+        async verify(token) {
+            this.user = await fetchWrapper.get(`${this.baseUrl}/api/auth/verify?token=${token}`);
             this.startRefreshTokenTimer();
         },
         logout() {
-            //fetchWrapper.post(`${baseUrl}/revoke-token`, {}, { credentials: 'include' });
+            //fetchWrapper.post(`${this.baseUrl}/revoke-token`, {}, { credentials: 'include' });
             this.stopRefreshTokenTimer();
             this.user = null;
             router.push('/login');
         },
         async refreshToken() {
             let refreshToken = this.user.refreshToken;
-            let newToken = await fetchWrapper.post(`${baseUrl}/api/auth/token`, { refreshToken }, { credentials: 'include' });
+            let newToken = await fetchWrapper.post(`${this.baseUrl}/api/auth/token`, { refreshToken }, { credentials: 'include' });
             this.user.accessToken = newToken.accessToken;
             this.startRefreshTokenTimer();
             console.log("refreshToken")

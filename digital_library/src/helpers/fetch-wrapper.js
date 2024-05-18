@@ -51,7 +51,7 @@ async function handleResponse(response) {
         }
 
         let error;
-        if (response.headers.get('content-type') && response.headers.get('content-type').includes('application/json') && (response.statusText !== '')) {
+        if (response.headers.get('content-type') && response.headers.get('content-type').includes('application/json')) {
             // Если ошибка возвращается в формате JSON, парсим ее
             const text = await response.text();
             const data = text && JSON.parse(text);
@@ -60,7 +60,7 @@ async function handleResponse(response) {
             // Если ошибка не возвращается в формате JSON, используем статус текст
             error = response.statusText;
         } else {
-            error = getErrorDescription(response.status);
+            error = "Sorry, there's been a mistake.";
         }
         return Promise.reject(error);
     }
@@ -70,15 +70,10 @@ async function handleResponse(response) {
     }
     // Если ответ в виде JSON, парсим его
     const text = await response.text();
-    return JSON.parse(text);
-}
-
-function getErrorDescription(status_code) {
-    if (status_code === 404) {
-        return "The account was not found. Please check the correctness of the entered data or register.";
-    } else if (status_code === 403) {
-        return "Incorrect username or password.";
+    if (text) {
+        return JSON.parse(text);
     } else {
-        return "Sorry, there's been a mistake.";
+        return '';
     }
 }
+

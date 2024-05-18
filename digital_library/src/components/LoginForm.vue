@@ -43,7 +43,7 @@ async function onSubmit(values, { setErrors }) {
     const { email, password } = values;
     try {
         await authStore.login(email, password);
-        router.back();
+        router.push('/');
     } catch (error) {
         return setErrors({ apiError: error });
     }

@@ -45,6 +45,7 @@ if (authStore.user) {
     margin-left: 100px;
     display: flex;
     justify-content: center;
+    margin-bottom: 30px;
 }
 
 .form-content {

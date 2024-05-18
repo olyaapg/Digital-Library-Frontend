@@ -5,6 +5,7 @@ import FoundBooks from '../components/FoundBooks.vue';
 import DetailedInformation from '../components/DetailedInformation.vue';
 import LoadBook from '../components/LoadBook.vue';
 import LoginView from '../components/LoginView.vue';
+import VerifyEmail from '../components/VerifyEmail.vue';
 
 
 export const router = createRouter({
@@ -13,6 +14,7 @@ export const router = createRouter({
     routes: [
         { name: "Searches", path: '/', component: Searches },
         { name: "LoginView", path: '/login', component: LoginView },
+        { name: "VerifyEmail", path: '/api/auth/verify', component: VerifyEmail, props: route => ({ token: route.query.token }) },
         { name: "FoundBooks", path: '/foundbooks', component: FoundBooks },
         { name: "LoadBook", path: '/loadbook', component: LoadBook, meta: { requiresAdmin: true } },
         {
