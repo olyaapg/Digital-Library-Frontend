@@ -65,20 +65,25 @@
         </div>
 
 
-        <div class="block">
-          <h2>Semantic book search</h2>
-          <div class="inputBlockSemantic">
-            <label for="chaptersContent" style="display: block; margin-bottom: 15px;">What do you want to read
-              about?</label>
-            <input id="chaptersContent" type="text" class="longLine" v-model="dataSemantic.query"
-              :disabled="typeSearch === 'advanced'" @input="clearMessage">
+        <div>
+          <div class="block">
+            <h2>Semantic book search</h2>
+            <div class="inputBlockSemantic">
+              <label for="chaptersContent" style="display: block; margin-bottom: 15px;">What do you want to read
+                about?</label>
+              <input id="chaptersContent" type="text" class="longLine" v-model="dataSemantic.query"
+                :disabled="typeSearch === 'advanced'" @input="clearMessage">
+            </div>
           </div>
           <div class="buttonContainer">
-            <button type="submit" :disabled="typeSearch === 'None'" class="btn btn-outline-primary"
-              style="margin-bottom: 20px;">
-              <span v-show="isSubmiting" class="spinner-border spinner-border-sm me-1"></span>
-              FIND
-            </button>
+            <div style="display: flex; align-items: baseline; gap: 15px;">
+              <button type="submit" :disabled="typeSearch === 'None'" class="btn btn-outline-primary"
+                style="margin-bottom: 20px; margin-right: 20px;">
+                <span v-show="isSubmiting" class="spinner-border spinner-border-sm me-1"></span>
+                FIND
+              </button>
+              <ToggleSwitch v-model:isChecked="isChecked" />
+            </div>
             <div v-show="typeSearch === 'None'" class="alert alert-secondary" role="alert">
               Fill in at least one field
             </div>
@@ -101,11 +106,13 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth.store';
 import { useBooksStore } from '../stores/books.store';
 import { fetchWrapper } from '../helpers/fetch-wrapper';
+import ToggleSwitch from './ToggleSwitch.vue';
 
 const serverURL = useAuthStore().baseUrl;
 const booksStore = useBooksStore();
 const router = useRouter()
 const errorMessage = ref();
+const isChecked = ref(true);
 const dataAdvanced = reactive({ must: { 'chapters.content': { query: '' }, title: { query: '' }, publisher: { query: '' } }, authors: [''] });
 const dataSemantic = reactive({ query: '' });
 const isSubmiting = ref(false)
@@ -134,6 +141,7 @@ const clearForm = () => {
 const suggestionsTitle = ref([]);
 const onInput = async (event) => {
   const query = event.target.value;
+  suggestionsAuthor.value = [];
   if (query.length > 2) {
     try {
       const response = await fetchWrapper.get(`${serverURL}/autocomplete/title/${query}`);
@@ -146,6 +154,7 @@ const onInput = async (event) => {
   }
 };
 const selectSuggestion = (suggestion) => {
+  suggestionsTitle.value = [];
   dataAdvanced.must.title.query = suggestion;
   suggestionsTitle.value = [];
 };
@@ -181,6 +190,9 @@ async function createPost() {
   isSubmiting.value = true;
   const url = `${serverURL}/book/search/${typeSearch.value}`;
   const data = typeSearch.value === 'advanced' ? dataAdvanced : dataSemantic;
+  if (!isChecked.value) {
+    data.isConsiderPopularity = isChecked.value;
+  }
   try {
     const response = await fetchWrapper.post(url, data);
     goToResults(response);
@@ -256,6 +268,7 @@ label {
   list-style: none;
   padding: 0;
   margin: 0;
+  line-height: normal;
 }
 
 

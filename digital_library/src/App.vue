@@ -17,10 +17,10 @@
           <img src="./assets/settings_icon.svg" class="button">
           <span style="cursor: pointer; padding: 5px;">Settings</span>
           <ul v-if="showSettings" class="settings-dropdown">
-            <li>{{ authStore.user.role }} - {{ authStore.user.nickname }}</li>
+            <li>{{ authStore.user.role }} - {{ authStore.user.name }}</li>
             <li>
               <div class="notification-checkbox" style="cursor: pointer;">
-                <input type="checkbox" id="notifications" v-model="authStore.user.notifications"
+                <input type="checkbox" id="notifications" v-model="authStore.user.isSendNotification"
                   style="cursor: pointer;">
                 <label for="notifications" style="cursor: pointer;" @click="switchNotifications">Receive
                   notifications</label>
@@ -38,6 +38,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useAuthStore } from './stores/auth.store';
+import { fetchWrapper } from './helpers/fetch-wrapper';
 
 const authStore = useAuthStore();
 const isAdmin = computed(() => {
@@ -54,7 +55,14 @@ function toggleSettings() {
 }
 
 const switchNotifications = async () => {
-  //await fetchWrapper.post(`${authStore.baseUrl}/`);
+  console.log("mya")
+  try {
+    authStore.user.isSendNotification = !authStore.user.isSendNotification;
+    await fetchWrapper.post(`${authStore.baseUrl}/user/notification`, { "isSendNotification": authStore.user.isSendNotification });
+  } catch (error) {
+    authStore.user.isSendNotification = !authStore.user.isSendNotification;
+    console.log(error);
+  }
 }
 </script>
 
