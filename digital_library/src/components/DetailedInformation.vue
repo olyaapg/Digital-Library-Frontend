@@ -10,7 +10,7 @@
                         <span class="fieldValue" v-if="theBook.reviews">{{ theBook.reviews.length }}</span>
                     </h3>
                     <h3>
-                        <span>Average rating:</span>
+                        <span>Rating:</span>
                         <span class="fieldValue">{{ theBook.meanGrade }}</span>
                     </h3>
                 </div>
@@ -59,8 +59,8 @@
 
         <div class="reviews details">
             <h2>Reviews</h2>
-            <div class="scrolling-component" ref="scrollComponent">
-                <Review v-for="review in theBook.reviews" :review="review" />
+            <div v-for="(review, i) in theBook.reviews" :key="i" class="scrolling-component" ref="scrollComponent">
+                <Review v-model:review="theBook.reviews[i]" />
             </div>
         </div>
         <div id="endOfPage"></div>

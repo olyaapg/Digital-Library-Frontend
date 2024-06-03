@@ -1,11 +1,11 @@
 <template>
-  <div class="review">
+  <div v-if="!isDeleted" class="review">
     <div class="nameAndGrade">
-      <span class="name">{{ review.user.name }}</span>
-      <StarRating v-model:rating="review.grade" :star-size="20" :read-only="true" :show-rating="false" />
+      <span class="name">{{ props.review.user.name }}</span>
+      <StarRating v-model:rating="props.review.grade" :star-size="20" :read-only="true" :show-rating="false" />
     </div>
     <div class="comment">
-      <p>{{ review.comment }}</p>
+      <p>{{ props.review.comment }}</p>
     </div>
     <div v-if="isAdmin" class="dangerButtons">
       <button type="button" class="btn btn-warning" @click="removeReview">Remove review</button>
@@ -17,47 +17,70 @@
 
 <script setup>
 import Swal from 'sweetalert2';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import StarRating from 'vue-star-rating';
 import { useAuthStore } from '../stores/auth.store';
 import { fetchWrapper } from '../helpers/fetch-wrapper';
 
+const isDeleted = ref(false);
 const authStore = useAuthStore();
 const serverUrl = authStore.baseUrl;
 const isAdmin = computed(() => authStore.user && authStore.user.role === 'ADMIN');
-
-function createSwal(title) {
-  return Swal.fire({
-    title: title,
-    text: 'Are you sure you want to continue?',
-    icon: 'question',
-    showDenyButton: "true"
-  });
-}
-
-function removeReview() {
-  createSwal("Remove review").then(async (result) => {
-    if (result.isConfirmed) {
-      console.log("remove")
-      //await fetchWrapper.post(`${serverUrl}/user/ban?userId=${review.user.id}`)
-    };
-  });
-}
-
-function banUser() {
-  createSwal("Ban user").then(async (result) => {
-    if (result.isConfirmed) {
-      await fetchWrapper.post(`${serverUrl}/user/ban?userId=${review.user.id}`)
-    };
-  });
-}
-
-defineProps({
+const props = defineProps({
   review: {
     type: Object,
     required: true
   }
 });
+
+function removeReview() {
+  Swal.fire({
+    title: "Remove review",
+    text: 'Are you sure you want to continue?',
+    icon: 'question',
+    showDenyButton: true
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        await fetchWrapper.delete(`${serverUrl}/review/delete/${props.review.id}`);
+        isDeleted.value = true;
+      } catch (error) {
+        console.log(error);
+      }
+    };
+  });
+}
+
+function banUser() {
+  Swal.fire({
+    title: "Ban user",
+    html: `
+      <span>Are you sure you want to continue?</span>
+      <div style="display: flex; align-items: center; white-space: nowrap; max-width: 300px; margin-left: 60px; margin-top: 30px;">
+        <input type="checkbox" id="removeReviews" style="cursor: pointer" />
+        <label style="cursor: pointer;" for="removeReviews">Remove all reviews of this user</label>
+      </div>
+    `,
+    showDenyButton: true,
+    confirmButtonText: 'OK',
+    denyButtonText: 'No',
+    preConfirm: () => {
+      return {
+        removeReviews: document.getElementById('removeReviews').checked
+      };
+    }
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const { removeReviews } = result.value;
+        await fetchWrapper.post(`${serverUrl}/user/ban?userId=${props.review.user.id}&isPermanent=${removeReviews}`);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  });
+}
+
 </script>
 
 <style scoped>
@@ -65,7 +88,6 @@ defineProps({
   margin-top: 50px;
   margin-left: 20px;
   max-width: 1000px;
-
 }
 
 .nameAndGrade {

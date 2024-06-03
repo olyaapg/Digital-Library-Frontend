@@ -1,5 +1,5 @@
 <template>
-  <div class="mainBody">
+  <div class="mainBody" id="app" @click="handleClick">
 
     <div class="block">
       <p>On this page you can find the book you need.</p>
@@ -20,7 +20,7 @@
             <div class="inputContainer">
               <input id="title" type="text" v-model="dataAdvanced.must.title.query"
                 :disabled="typeSearch === 'semantic'" @input="onInput">
-              <ul v-if="suggestionsTitle.length" class="suggestions">
+              <ul v-if="suggestionsTitle.length && showSuggestionsTitle" class="suggestions">
                 <li v-for="(suggestion, index) in suggestionsTitle" :key="index" @click="selectSuggestion(suggestion)">
                   {{ suggestion }}
                 </li>
@@ -33,7 +33,7 @@
             <div class="inputContainer">
               <input :id="'author' + index" type="text" v-model="dataAdvanced.authors[index]"
                 :disabled="typeSearch === 'semantic'" @input="(event) => onAuthorInput(event, index)" />
-              <ul v-if="suggestionsAuthor[index]?.length" class="suggestions">
+              <ul v-if="suggestionsAuthor[index]?.length && showSuggestionsAuthor" class="suggestions">
                 <li v-for="(suggestion, sIndex) in suggestionsAuthor[index]" :key="sIndex"
                   @click="selectAuthorSuggestion(suggestion, index)">
                   {{ suggestion }}
@@ -113,6 +113,8 @@ const booksStore = useBooksStore();
 const router = useRouter()
 const errorMessage = ref();
 const isChecked = ref(true);
+const showSuggestionsAuthor = ref(false);
+const showSuggestionsTitle = ref(false);
 const dataAdvanced = reactive({ must: { 'chapters.content': { query: '' }, title: { query: '' }, publisher: { query: '' } }, authors: [''] });
 const dataSemantic = reactive({ query: '' });
 const isSubmiting = ref(false)
@@ -140,6 +142,7 @@ const clearForm = () => {
 }
 const suggestionsTitle = ref([]);
 const onInput = async (event) => {
+  showSuggestionsTitle.value = true;
   const query = event.target.value;
   suggestionsAuthor.value = [];
   if (query.length > 2) {
@@ -156,13 +159,13 @@ const onInput = async (event) => {
 const selectSuggestion = (suggestion) => {
   suggestionsTitle.value = [];
   dataAdvanced.must.title.query = suggestion;
-  suggestionsTitle.value = [];
 };
 watch(() => dataAdvanced.must.title.query, clearMessage);
 
 const suggestionsAuthor = ref({});
 
 const onAuthorInput = async (event, index) => {
+  showSuggestionsAuthor.value = true;
   const query = event.target.value;
   if (query.length > 2) {
     try {
@@ -185,6 +188,11 @@ const selectAuthorSuggestion = (suggestion, index) => {
   dataAdvanced.authors[index] = suggestion;
   suggestionsAuthor.value[index] = [];
 };
+
+const handleClick = () => {
+  showSuggestionsAuthor.value = false;
+  showSuggestionsTitle.value = false;
+}
 
 async function createPost() {
   isSubmiting.value = true;

@@ -14,6 +14,10 @@
               <h3>{{ book.title }}</h3>
               <p>{{ book.authors }}</p>
             </td>
+            <td>
+              <StarRating v-model:rating="book.averageGrade" :star-size="20" :read-only="true" :show-rating="false" />
+              <p style="margin-top: 10px;">{{ book.countReviews }} reviews</p>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -27,6 +31,7 @@
 import { useRouter } from 'vue-router'
 import { useBooksStore } from '../stores/books.store';
 import { useAuthStore } from '../stores/auth.store';
+import StarRating from 'vue-star-rating';
 
 const booksStore = useBooksStore();
 const router = useRouter()
@@ -35,6 +40,10 @@ const serverURL = useAuthStore().baseUrl;
 function getDetails(id) {
   router.push({ name: 'DetailedInformation', params: { number: `${id}` } });
 }
+
+const formatNumber = (value, decimals) => {
+  return value.toFixed(decimals);
+};
 </script>
 
 
@@ -51,7 +60,8 @@ function getDetails(id) {
 
 .bookTable td,
 .bookTable th {
-  padding: 10px;
+  padding-right: 60px;
+  padding-bottom: 40px;
 }
 
 .bookTable tr {
