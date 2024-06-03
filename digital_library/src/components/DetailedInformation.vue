@@ -1,5 +1,5 @@
 <template>
-    <div v-if="theBook" class="mainBody">
+    <div v-if="theBook && loadPage" class="mainBody">
         <div class="bookInfo">
             <div class="details flexAndColumn">
                 <img :src="`${serverURL}` + '/book/cover/' + `${bookNumber}`" class="book-cover">
@@ -37,7 +37,7 @@
 
                 <button @click="downloadBook" class="btn btn-success buttonDownload">Download
                     EPUB</button>
-                <div v-if="haveRole">
+                <div v-if="haveRole && canMakeReview">
                     <h2>Create review</h2>
                     <h3 style="margin: 15px;">Your comment:</h3>
                     <div class="flexAndColumn">
@@ -84,9 +84,11 @@ const authStore = useAuthStore();
 const route = useRoute();
 const serverURL = authStore.baseUrl;
 
+const canMakeReview = ref(false);
 const currentRating = ref(0);
 const page = ref(0);
 const loading = ref(false);
+const loadPage = ref(false);
 const isSubmiting = ref(false);
 const bookNumber = route.params.number;
 const theBook = ref();
@@ -134,6 +136,7 @@ async function publishComment() {
         await fetchWrapper.post(`${serverURL}/review/create/${bookNumber}`, body);
         currentRating.value = 0;
         comment.value = '';
+        canMakeReview.value = false;
     } catch (error) {
         console.error('Ошибка при публикации комментария:', error);
     } finally {
@@ -182,7 +185,11 @@ onMounted(async () => {
         }
 
         const responseMeanGrade = await fetchWrapper.get(`${serverURL}/review/getMeanGrade/${bookNumber}`);
-        theBook.value.meanGrade = responseMeanGrade === -1 ? "-" : responseMeanGrade.toFixed(2);
+        theBook.value.meanGrade = responseMeanGrade === -1 ? "-" : responseMeanGrade.toFixed(1);
+
+        if (authStore.user) {
+            canMakeReview.value = await fetchWrapper.get(`${serverURL}/review/getInf?Book=${bookNumber}&User=${authStore.user.id}`);
+        }
 
         theBook.value.reviews = [];
         fetchReviews();
@@ -199,6 +206,7 @@ onMounted(async () => {
     } catch (error) {
         console.error('Ошибка при загрузке книги:', error);
     }
+    loadPage.value = true;
 });
 
 

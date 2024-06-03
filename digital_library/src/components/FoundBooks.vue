@@ -15,7 +15,7 @@
               <p>{{ book.authors }}</p>
             </td>
             <td>
-              <StarRating v-model:rating="book.averageGrade" :star-size="20" :read-only="true" :show-rating="false" />
+              <StarRating v-model:rating="book.averageGrade" :star-size="20" :read-only="true" :show-rating="false" :increment="0.1" />
               <p style="margin-top: 10px;">{{ book.countReviews }} reviews</p>
             </td>
           </tr>
