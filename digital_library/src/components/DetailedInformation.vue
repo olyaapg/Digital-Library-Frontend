@@ -1,59 +1,123 @@
 <template>
-    <div :class="['innerBody', 'mainBody']">
-        <div>
-            <img :src="`${serverURL}` + '/book/cover/' + `${route.params.number}`" class="book-cover">
-        </div>
-        <div class="details">
-            <h2 class="titleBook">{{ theBook.title }}</h2>
-            <div v-for="fieldInfo in listFields" :key="fieldInfo[0]" class="fieldInfo">
-                <h3 v-if="theBook[fieldInfo[0]] !== null && theBook[fieldInfo[0]].trim() !== ''">
-                    <span>{{ fieldInfo[1] }}:</span>
-                    <span class="fieldValue">{{ theBook[fieldInfo[0]] }}</span>
-                </h3>
+    <div v-if="theBook && loadPage" class="mainBody">
+        <div class="bookInfo">
+            <div class="details flexAndColumn">
+                <img :src="`${serverURL}` + '/book/cover/' + `${bookNumber}`" class="book-cover">
+                <h2>Popularity</h2>
+                <div class="fieldInfo">
+                    <h3>
+                        <span>Number of reviews:</span>
+                        <span class="fieldValue" v-if="theBook.reviews">{{ theBook.reviews.length }}</span>
+                    </h3>
+                    <h3>
+                        <span>Rating:</span>
+                        <span class="fieldValue">{{ theBook.meanGrade }}</span>
+                    </h3>
+                </div>
             </div>
-            <div v-if="theBook.description" id="descriptionBook">
-                <h3>About the book:</h3>
-                <p>{{ theBook.description }}</p>
+
+            <div class="details flexAndColumn">
+                <h1 class="titleBook">{{ theBook.title }}</h1>
+                <div v-for="fieldInfo in listFields" :key="fieldInfo[0]" class="fieldInfo">
+                    <h3 v-if="theBook[fieldInfo[0]] !== null && theBook[fieldInfo[0]].trim() !== ''">
+                        <span>{{ fieldInfo[1] }}:</span>
+                        <span class="fieldValue">{{ theBook[fieldInfo[0]] }}</span>
+                    </h3>
+                </div>
+                <div v-if="theBook.size" class="fieldInfo">
+                    <h3>
+                        <span>Size:</span>
+                        <span class="fieldValue">{{ theBook.size }}</span>
+                    </h3>
+                </div>
+                <div v-if="theBook.description" id="descriptionBook">
+                    <h3 style="margin-bottom: 30px; margin-top: 30px">About the book:</h3>
+                    <p>{{ theBook.description }}</p>
+                </div>
+
+                <button @click="downloadBook" class="btn btn-success buttonDownload">Download
+                    EPUB</button>
+                <div v-if="haveRole && canMakeReview">
+                    <h2>Create review</h2>
+                    <h3 style="margin: 15px;">Your comment:</h3>
+                    <div class="flexAndColumn">
+                        <textarea v-model="comment" rows="4" cols="50" placeholder="Write your comment here"
+                            maxlength="255" style="margin-bottom: 15px;"></textarea>
+                        <div class="gradeAndPublish">
+                            <div>
+                                <p style="margin: 0;">Grade</p>
+                                <StarRating v-model:rating="currentRating" :star-size="30" />
+                            </div>
+                            <button type="button" @click="publishComment" class="btn btn-success buttonPublish">
+                                <span v-show="isSubmiting" class="spinner-border spinner-border-sm me-1"></span>
+                                Publish</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button id="buttonDownload" @click="downloadBook" style="align-self: center;">Download EPUB</button>
         </div>
+
+        <div class="reviews details">
+            <h2>Reviews</h2>
+            <div v-for="(review, i) in theBook.reviews" :key="i" class="scrolling-component" ref="scrollComponent">
+                <Review v-model:review="theBook.reviews[i]" />
+            </div>
+        </div>
+        <div id="endOfPage"></div>
+    </div>
+
+    <div v-else class="spinner-container">
+        <div class="spinner"></div>
     </div>
 </template>
 
 
 <script setup>
-import { inject, ref } from 'vue';
-import axios from 'axios';
+import { computed, onMounted, ref, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
+import { fetchWrapper } from '../helpers/fetch-wrapper';
+import { useAuthStore } from '../stores/auth.store';
+import StarRating from 'vue-star-rating';
+import Review from '../components/Review.vue';
 
+const authStore = useAuthStore();
 const route = useRoute();
-const theBook = inject("theBook")
-const serverURL = inject("serverURL")
+const serverURL = authStore.baseUrl;
+
+const canMakeReview = ref(false);
+const currentRating = ref(0);
+const page = ref(0);
+const loading = ref(false);
+const loadPage = ref(false);
+const isSubmiting = ref(false);
+const bookNumber = route.params.number;
+const theBook = ref();
+const comment = ref();
 const listFields = ref([
-    ["authors", "Author"],
+    ["authors", "Authors"],
     ["language", "Language"],
     ["genres", "Related Phrases"],
     ["publisher", "Publisher"]
-])
+]);
+const haveRole = computed(() => {
+    return !!authStore.user;
+});
 
-function downloadBook() {
-    axios
-        .get(serverURL + '/book/download/' + route.params.number, {
-            responseType: 'blob',
-        })
-        .then(response => responseProcessing(response))
-        .catch(error => {
-            console.error('Ошибка запроса:', error);
-        })
+async function downloadBook() {
+    try {
+        const url = `${serverURL}/book/download/${bookNumber}`;
+        const response = await fetchWrapper.get(url, null, { responseType: 'blob' });
+        responseProcessing(response);
+    } catch (error) {
+        console.error('Ошибка запроса:', error);
+    }
 }
 
-function responseProcessing(response) {
-    const blob = new Blob([response.data], { type: 'application/epub+zip' });
+function responseProcessing(blob) {
     const url = window.URL.createObjectURL(blob);
 
     const link = document.createElement('a');
     link.href = url;
-    console.log(theBook.value.title)
     link.download = `${theBook.value.title}` + '.epub';
 
     document.body.appendChild(link);
@@ -61,12 +125,101 @@ function responseProcessing(response) {
 
     document.body.removeChild(link);
 }
+
+async function publishComment() {
+    isSubmiting.value = true;
+    let body = {
+        "grade": currentRating.value,
+        "comment": comment.value
+    };
+    try {
+        await fetchWrapper.post(`${serverURL}/review/create/${bookNumber}`, body);
+        currentRating.value = 0;
+        comment.value = '';
+        canMakeReview.value = false;
+    } catch (error) {
+        console.error('Ошибка при публикации комментария:', error);
+    } finally {
+        isSubmiting.value = false;
+    }
+}
+
+async function fetchReviews() {
+    if (loading.value) return;
+    loading.value = true;
+
+    try {
+        const response = await fetchWrapper.get(`${serverURL}/review/getBook/${bookNumber}?size=5&page=${page.value}`);
+        theBook.value.reviews = [...theBook.value.reviews, ...response];
+        if (response.length !== 0) {
+            page.value += 1;
+        }
+    } catch (error) {
+        console.error('Ошибка при загрузке отзывов:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+
+const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+        fetchReviews();
+    }
+});
+
+let scrollComponent;
+
+onMounted(async () => {
+    try {
+        const responseBook = await fetchWrapper.get(`${serverURL}/book/${bookNumber}`);
+        theBook.value = responseBook;
+        if (theBook.value.size) {
+            let bytes = theBook.value.size;
+            if (bytes < 1024) {
+                theBook.value.size = bytes + " bytes";
+            } else if (bytes < 1048576) {
+                theBook.value.size = (bytes / 1024).toFixed(0) + " KB";
+            } else {
+                theBook.value.size = (bytes / 1048576).toFixed(0) + " MB";
+            }
+        }
+
+        const responseMeanGrade = await fetchWrapper.get(`${serverURL}/review/getMeanGrade/${bookNumber}`);
+        theBook.value.meanGrade = responseMeanGrade === -1 ? "-" : responseMeanGrade.toFixed(1);
+
+        if (authStore.user) {
+            canMakeReview.value = await fetchWrapper.get(`${serverURL}/review/getInf?Book=${bookNumber}&User=${authStore.user.id}`);
+        }
+
+        theBook.value.reviews = [];
+        fetchReviews();
+
+        // Обработчик для IntersectionObserver для наблюдения за прокруткой страницы
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                fetchReviews();
+            }
+        });
+
+        // Наблюдение за концом страницы
+        observer.observe(document.querySelector('#endOfPage')); // Добавьте элемент с id="endOfPage" в конец вашей страницы
+    } catch (error) {
+        console.error('Ошибка при загрузке книги:', error);
+    }
+    loadPage.value = true;
+});
+
+
+onBeforeUnmount(() => {
+    observer.disconnect();
+});
 </script>
 
 
 <style scoped>
-p {
-    line-height: 1.5;
+.flexAndColumn {
+    display: flex;
+    flex-direction: column;
 }
 
 .fieldValue {
@@ -79,21 +232,20 @@ p {
     height: auto;
     max-width: 350px;
     margin-right: 250px;
-    margin-left: 50px;
+    margin-bottom: 30px;
 }
 
 .fieldInfo h3 {
     margin: 10px 0;
 }
 
-.innerBody {
+.bookInfo {
     display: flex;
     margin-right: 50px;
 }
 
 .details {
-    display: flex;
-    flex-direction: column;
+    margin-left: 50px;
 }
 
 .titleBook {
@@ -104,12 +256,23 @@ p {
     margin-top: 20px;
 }
 
-#buttonDownload {
-    padding: 10px 20px;
-    margin-bottom: 40px;
-    width: 100px;
-    height: 50px;
-    margin-top: 20px;
-    cursor: pointer;
+.buttonDownload {
+    align-self: center;
+    margin: 30px;
+    margin-bottom: 60px;
+}
+
+.buttonPublish {
+    align-self: center;
+}
+
+.gradeAndPublish {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.reviews {
+    margin-top: 50px;
 }
 </style>

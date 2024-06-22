@@ -1,26 +1,29 @@
 <template>
   <div class="centered-container">
-    <h3>To upload a book in EPUB format to our Digital library:</h3>
+    <h4>To upload a book in EPUB format to our Digital library:</h4>
     <input id="loadButton" type="file" ref="fileInput" @change="handleFileChange" class="custom-file-upload">
     <label for="loadButton">Choose file</label>
     <div v-if="fileLabel" style="display: flex; flex-direction: column; align-items: center;">
       <p>{{ fileLabel }}</p>
-      <button @click="uploadFile">Upload</button>
+      <button type="button" class="btn btn-outline-info" @click="uploadFile" :disabled="sendingStatus === statuses[1]">Upload</button>
     </div>
     <span v-if="sendingStatus">
       <p>{{ sendingStatus }}</p>
     </span>
+    <img v-if="sendingStatus === statuses[1]" :src="Kitty">
   </div>
 </template>
 
 
 
 <script setup>
-import { inject, ref } from 'vue';
-import axios from 'axios';
+import { ref } from 'vue';
+import { fetchWrapper } from '../helpers/fetch-wrapper';
+import { useAuthStore } from '../stores/auth.store';
+import Kitty from '../assets/Kitty.svg'
 
+const serverURL = useAuthStore().baseUrl;
 const fileInput = ref(null);
-const serverURL = inject("serverURL")
 const fileLabel = ref(null)
 const statuses = ref(["Wait a moment, please...", "Successfully! Thank you ^_^", "Something went wrong :(", null])
 const sendingStatus = ref(statuses.value[3])
@@ -32,9 +35,10 @@ const handleFileChange = (event) => {
   } else {
     fileLabel.value = null;
   }
+  sendingStatus.value = statuses.value[3];
 }
 
-const uploadFile = () => {
+const uploadFile = async () => {
   if (fileInput.value.files.length > 0) {
     const file = fileInput.value.files[0];
 
@@ -43,7 +47,7 @@ const uploadFile = () => {
 
     sendingStatus.value = statuses.value[0]
 
-    axios.post(serverURL + '/book/load', formData)
+    await fetchWrapper.post(serverURL + '/book/load', formData)
       .then(_response => {
         sendingStatus.value = statuses.value[1]
       })
@@ -59,16 +63,13 @@ const uploadFile = () => {
 
 
 <style scoped>
-.success {
-  color: greenyellow;
-}
-
 .centered-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 40vh;
+  gap: 20px;
+  margin-top: 50px;
 }
 
 .custom-file-upload {
@@ -98,4 +99,4 @@ const uploadFile = () => {
 .custom-file-upload+label {
   cursor: pointer;
 }
-</style>  
+</style>

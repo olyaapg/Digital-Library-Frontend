@@ -1,18 +1,22 @@
 <template>
   <div class="innerBody">
     <div>
-      <p>According to your request, there were {{ dataList.length }} books:</p>
+      <p>According to your request, there were {{ booksStore.listFoundBooks.length }} books:</p>
     </div>
 
     <div class="listRes">
       <table class="bookTable">
         <tbody>
-          <tr v-for="(book, index) in dataList" :key="index" @click="getDetails(book.id)">
+          <tr v-for="(book, index) in booksStore.listFoundBooks" :key="index" @click="getDetails(book.id)">
             <td>{{ index + 1 }}</td>
             <td><img :src="`${serverURL}` + '/book/cover/' + `${book.id}`" alt="Book Cover" class="book-cover" /></td>
             <td>
               <h3>{{ book.title }}</h3>
               <p>{{ book.authors }}</p>
+            </td>
+            <td>
+              <StarRating v-model:rating="book.averageGrade" :star-size="20" :read-only="true" :show-rating="false" :increment="0.1" />
+              <p style="margin-top: 10px;">{{ book.countReviews }} reviews</p>
             </td>
           </tr>
         </tbody>
@@ -20,43 +24,28 @@
     </div>
   </div>
 </template>
-  
+
 
 
 <script setup>
-import axios from 'axios'
 import { useRouter } from 'vue-router'
-import { inject } from 'vue'
+import { useBooksStore } from '../stores/books.store';
+import { useAuthStore } from '../stores/auth.store';
+import StarRating from 'vue-star-rating';
 
+const booksStore = useBooksStore();
 const router = useRouter()
-const dataList = inject('dataList')
-const serverURL = inject('serverURL')
-const theBook = inject("theBook")
+const serverURL = useAuthStore().baseUrl;
 
 function getDetails(id) {
-  console.log(id)
-  axios
-    .get(serverURL + `/book/${id}`)
-    .then(response => goToResults(response, id))
-    .catch(error => {
-      console.error('Ошибка запроса:', error);
-    })
-  /*axios
-    .get(serverURL)
-    .then(response => goToResults(response, id))
-    .catch(error => {
-      console.error('Ошибка запроса:', error);
-    })*/
+  router.push({ name: 'DetailedInformation', params: { number: `${id}` } });
 }
 
-function goToResults(response, id) {
-  console.log(response)
-  console.log(id)
-  theBook.value = response.data
-  router.push({ name: 'DetailedInformation', params: { number: `${id}` } })
-}
+const formatNumber = (value, decimals) => {
+  return value.toFixed(decimals);
+};
 </script>
-  
+
 
 
 <style scoped>
@@ -71,7 +60,8 @@ function goToResults(response, id) {
 
 .bookTable td,
 .bookTable th {
-  padding: 10px;
+  padding-right: 60px;
+  padding-bottom: 40px;
 }
 
 .bookTable tr {

@@ -1,5 +1,5 @@
 <template>
-  <div class="mainBody">
+  <div class="mainBody" id="app" @click="handleClick">
 
     <div class="block">
       <p>On this page you can find the book you need.</p>
@@ -7,6 +7,7 @@
       <p>1. <span class="searches">Advanced book search</span> - for those who know exactly what they want;</p>
       <p>2. And <span class="searches">semantic book search</span> - for those who have not yet decided.</p>
       <p>Choose the one you like!</p>
+      <button type="button" class="btn btn-light" @click="clearForm" :disabled="isSubmiting">Clear</button>
     </div>
 
     <form @submit.prevent="createPost">
@@ -17,48 +18,78 @@
           <div class="inputBlock">
             <label for="title">Title:</label>
             <div class="inputContainer">
-              <input id="title" type="text" v-model="dataAdvanced.must.title.query" :disabled="typeSearch === 'semantic'"
-                @input="changeOnAdvanced">
+              <input id="title" type="text" v-model="dataAdvanced.must.title.query"
+                :disabled="typeSearch === 'semantic'" @input="onInput">
+              <ul v-if="suggestionsTitle.length && showSuggestionsTitle" class="suggestions">
+                <li v-for="(suggestion, index) in suggestionsTitle" :key="index" @click="selectSuggestion(suggestion)">
+                  {{ suggestion }}
+                </li>
+              </ul>
             </div>
           </div>
 
-          <div class="inputBlock">
-            <label for="author">Author:</label>
+          <div v-for="(author, index) in dataAdvanced.authors" :key="index" class="inputBlock">
+            <label :for="'author' + index">Author:</label>
             <div class="inputContainer">
-              <input id="author" type="text" v-model="dataAdvanced.must.authors.query"
-                :disabled="typeSearch === 'semantic'" @input="changeOnAdvanced">
+              <input :id="'author' + index" type="text" v-model="dataAdvanced.authors[index]"
+                :disabled="typeSearch === 'semantic'" @input="(event) => onAuthorInput(event, index)" />
+              <ul v-if="suggestionsAuthor[index]?.length && showSuggestionsAuthor" class="suggestions">
+                <li v-for="(suggestion, sIndex) in suggestionsAuthor[index]" :key="sIndex"
+                  @click="selectAuthorSuggestion(suggestion, index)">
+                  {{ suggestion }}
+                </li>
+              </ul>
             </div>
+            <button type="button" class="btn btn-light"
+              v-if="dataAdvanced.authors.length < 5 && index === dataAdvanced.authors.length - 1"
+              @click="addAuthorField" :disabled="typeSearch === 'semantic'">
+              +
+            </button>
           </div>
 
           <div class="inputBlock">
             <label for="publisher">Publisher:</label>
             <div class="inputContainer">
               <input id="publisher" type="text" v-model="dataAdvanced.must.publisher.query"
-                :disabled="typeSearch === 'semantic'" @input="changeOnAdvanced">
+                :disabled="typeSearch === 'semantic'" @input="clearMessage">
             </div>
           </div>
-          
+
           <div class="inputBlock">
             <label for="quote">Quote:</label>
             <div class="inputContainer">
               <input id="quote" type="text" v-model="dataAdvanced.must['chapters.content'].query" class="longLine"
-                :disabled="typeSearch === 'semantic'" @input="changeOnAdvanced">
+                :disabled="typeSearch === 'semantic'" @input="clearMessage">
             </div>
           </div>
         </div>
 
 
-        <div class="block">
-          <h2>Semantic book search</h2>
-          <div class="inputBlockSemantic">
-            <label for="chaptersContent" style="display: block; margin-bottom: 15px;">What do you want to read
-              about?</label>
-            <input id="chaptersContent" type="text" class="longLine" v-model="dataSemantic.query"
-              :disabled="typeSearch === 'advanced'" @input="changeOnSemantic">
+        <div>
+          <div class="block">
+            <h2>Semantic book search</h2>
+            <div class="inputBlockSemantic">
+              <label for="chaptersContent" style="display: block; margin-bottom: 15px;">What do you want to read
+                about?</label>
+              <input id="chaptersContent" type="text" class="longLine" v-model="dataSemantic.query"
+                :disabled="typeSearch === 'advanced'" @input="clearMessage">
+            </div>
           </div>
           <div class="buttonContainer">
-            <button id="buttonFind" type="submit" :disabled="typeSearch === 'None'">FIND</button>
-            <p id="labelAboveButton" v-if="typeSearch === 'None'">Fill in at least one field</p>
+            <div style="display: flex; align-items: baseline; gap: 15px;">
+              <button type="submit" :disabled="typeSearch === 'None'" class="btn btn-outline-primary"
+                style="margin-bottom: 20px; margin-right: 20px;">
+                <span v-show="isSubmiting" class="spinner-border spinner-border-sm me-1"></span>
+                FIND
+              </button>
+              <ToggleSwitch v-model:isChecked="isChecked" />
+            </div>
+            <div v-show="typeSearch === 'None'" class="alert alert-secondary" role="alert">
+              Fill in at least one field
+            </div>
+            <div v-if="errorMessage" class="alert alert-danger" role="alert">
+              {{ errorMessage }}
+            </div>
           </div>
         </div>
       </div>
@@ -70,87 +101,121 @@
 
 
 <script setup>
-import axios from 'axios'
-import { reactive, inject, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth.store';
+import { useBooksStore } from '../stores/books.store';
+import { fetchWrapper } from '../helpers/fetch-wrapper';
+import ToggleSwitch from './ToggleSwitch.vue';
 
+const serverURL = useAuthStore().baseUrl;
+const booksStore = useBooksStore();
 const router = useRouter()
-const dataList = inject('dataList')
-const serverURL = inject('serverURL')
-const dataAdvanced = reactive({
-  must: {
-    'chapters.content': {
-      query: ''
-    },
-    title: {
-      query: ''
-    },
-    authors: {
-      query: ''
-    },
-    publisher: {
-      query: ''
-    }
-  }
-})
-const dataSemantic = reactive({ query: '' })
-const typeSearch = ref('None')
-
-function changeOnSemantic(event) {
-  typeSearch.value = event.target.value === '' ? 'None' : 'semantic';
-}
-
-function changeOnAdvanced(event) {
-  typeSearch.value = event.target.value === '' ? 'None' : 'advanced';
-}
-
-function createPost() {
-  console.log("createPost")
-  console.log(typeSearch.value)
-  if (typeSearch.value === 'advanced') {
-    console.log("advanced")
-    console.log(dataAdvanced)
-    axios
-      .post(serverURL + '/book/search/advanced', dataAdvanced)
-      .then(response => goToResults(response))
-      .catch(error => {
-        console.error('Ошибка запроса:', error);
-      })
+const errorMessage = ref();
+const isChecked = ref(true);
+const showSuggestionsAuthor = ref(false);
+const showSuggestionsTitle = ref(false);
+const dataAdvanced = reactive({ must: { 'chapters.content': { query: '' }, title: { query: '' }, publisher: { query: '' } }, authors: [''] });
+const dataSemantic = reactive({ query: '' });
+const isSubmiting = ref(false)
+const typeSearch = computed(() => {
+  if (dataAdvanced.must['chapters.content'].query !== '' || dataAdvanced.must.title.query !== '' || dataAdvanced.must.publisher.query !== '' || dataAdvanced.authors.some(author => author.trim() !== '')) {
+    return 'advanced';
+  } else if (dataSemantic.query !== '') {
+    return 'semantic';
   } else {
-    console.log("semantic")
-    console.log(dataSemantic)
-    axios
-      .post(serverURL + '/book/search/semantic', dataSemantic)
-      .then(response => goToResults(response))
-      .catch(error => {
-        console.error('Ошибка запроса:', error);
-      })
+    return 'None';
   }
-  /*axios
-    .post(serverURL, dataAdvanced)
-    .then(response => goToResults(response))*/
+});
+const clearMessage = () => { errorMessage.value = null; }
+const clearForm = () => {
+  dataAdvanced.must = {
+    'chapters.content': { query: '' },
+    title: { query: '' },
+    publisher: { query: '' }
+  };
+  dataAdvanced.authors = [''];
+  dataSemantic.query = '';
+  errorMessage.value = null;
+  suggestionsTitle.value = [];
+  suggestionsAuthor.value = {};
 }
+const suggestionsTitle = ref([]);
+const onInput = async (event) => {
+  showSuggestionsTitle.value = true;
+  const query = event.target.value;
+  suggestionsAuthor.value = [];
+  if (query.length > 2) {
+    try {
+      const response = await fetchWrapper.get(`${serverURL}/autocomplete/title/${query}`);
+      suggestionsTitle.value = response;
+    } catch (error) {
+      console.error('Ошибка получения данных автокомплита:', error);
+    }
+  } else {
+    suggestionsTitle.value = [];
+  }
+};
+const selectSuggestion = (suggestion) => {
+  suggestionsTitle.value = [];
+  dataAdvanced.must.title.query = suggestion;
+};
+watch(() => dataAdvanced.must.title.query, clearMessage);
+
+const suggestionsAuthor = ref({});
+
+const onAuthorInput = async (event, index) => {
+  showSuggestionsAuthor.value = true;
+  const query = event.target.value;
+  if (query.length > 2) {
+    try {
+      const response = await fetchWrapper.get(`${serverURL}/autocomplete/authors/${query}`);
+      suggestionsAuthor.value[index] = response;
+    } catch (error) {
+      console.error('Ошибка получения данных автокомплита:', error);
+    }
+  } else {
+    suggestionsAuthor.value[index] = [];
+  }
+};
+const addAuthorField = () => {
+  if (dataAdvanced.authors.length < 5) {
+    dataAdvanced.authors.push('');
+  }
+};
+
+const selectAuthorSuggestion = (suggestion, index) => {
+  dataAdvanced.authors[index] = suggestion;
+  suggestionsAuthor.value[index] = [];
+};
+
+const handleClick = () => {
+  showSuggestionsAuthor.value = false;
+  showSuggestionsTitle.value = false;
+}
+
+async function createPost() {
+  isSubmiting.value = true;
+  const url = `${serverURL}/book/search/${typeSearch.value}`;
+  const data = typeSearch.value === 'advanced' ? dataAdvanced : dataSemantic;
+  if (!isChecked.value) {
+    data.isConsiderPopularity = isChecked.value;
+  }
+  try {
+    const response = await fetchWrapper.post(url, data);
+    goToResults(response);
+  } catch (error) {
+    console.error('Ошибка запроса:', error);
+    errorMessage.value = 'An error occurred while submitting the form. Please try again.';
+  } finally {
+    isSubmiting.value = false;
+  }
+}
+
 
 function goToResults(response) {
-  console.log(response)
-  dataList.value = response.data
-  dataAdvanced.must = {
-    'chapters.content': {
-      query: '',
-      operator: 'And'
-    },
-    title: {
-      query: ''
-    },
-    authors: {
-      query: ''
-    },
-    publisher: {
-      query: ''
-    }
-  }
-  dataSemantic.query = ''
-  router.push({ name: 'Books' })
+  booksStore.setListFoundBooks(response);
+  router.push({ name: 'FoundBooks' })
 }
 </script>
 
@@ -168,12 +233,17 @@ function goToResults(response) {
   display: flex;
   align-items: baseline;
 }
+
 .inputBlockSemantic {
   margin-top: 40px;
 }
 
 .inputContainer {
   margin-left: 10px;
+  display: block;
+  align-items: center;
+  gap: 5px;
+  position: relative;
 }
 
 label {
@@ -194,11 +264,28 @@ label {
   margin-top: 100px;
 }
 
-#labelAboveButton {
-  color: red;
+.suggestions {
+  position: absolute;
+  width: 100%;
+  z-index: 1000;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 150px;
+  overflow-y: auto;
+  background: white;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  line-height: normal;
 }
 
-#buttonFind {
-  padding: 10px 20px;
+
+.suggestions li {
+  padding: 8px;
   cursor: pointer;
-}</style>
+}
+
+.suggestions li:hover {
+  background-color: #f0f0f0;
+}
+</style>
